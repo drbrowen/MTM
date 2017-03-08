@@ -1,0 +1,64 @@
+<VirtualHost _default_:3443>
+        ServerAdmin webmaster@localhost
+
+        KeepAliveTimeout 300
+
+        DAVLockDB /var/www/davlocks/DAVLock
+
+        DocumentRoot /var/www/roots
+        <Directory />
+                Options FollowSymLinks
+                AllowOverride None
+        </Directory>
+        <Directory "/var/www/roots/">
+                Options Indexes FollowSymLinks MultiViews
+                AllowOverride None
+
+                AuthLDAPBindDN "someaduser@ad.uillinois.edu"
+                AuthLDAPBindPassword "someadpass"
+                AuthLDAPURL "ldaps://somead.server.edu/dc=ad,dc=uillinois,dc=edu?sAMAccountName?sub?(objectClass=*)"
+                AuthType basic
+                AuthName "AD Authorization"
+                AuthBasicProvider ldap
+                AuthUserFile /dev/null
+                AuthLDAPSubGroupClass group
+                AuthLDAPMaxSubGroupDepth 5
+                require valid-user
+        </Directory>
+
+        <Location "/">
+          require ldap-group CN=Munki DAV Users,OU=User Groups,DC=ad,DC=uillinois,DC=edu
+        </Location>
+
+        <Location "/ONBOARD">
+	  # Dirty hack for development.
+	  require  user owen
+          DAV On        
+        </Location>
+
+        <Directory "/var/www/roots/repos">
+          DirectoryIndex index.html
+          DAV On
+          AllowOverride None
+          RemoveHandler .php
+          RemoveType .php
+          php_flag engine off
+          <LimitExcept PROPFIND GET OPTIONS>
+            require ldap-group CN=Shared Munki Admins,OU=User Groups,DC=ad,DC=uillinois,DC=edu
+          </LimitExcept>
+          <Limit PROPFIND GET OPTIONS>
+            require ldap-group CN=Munki DAV Users,OU=User Groups,DC=ad,DC=uillinois,DC=edu
+          </Limit>
+        </Directory>
+
+        RewriteEngine On
+        include /etc/apache/conf/munki-conf-per-group/munkirepo-*.dav
+
+        <Directory /var/www/roots/shared>
+          <Files "service.php">
+            SetHandler application/x-httpd-php
+          </Files>
+        </Directory>
+
+
+</VirtualHost>

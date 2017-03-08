@@ -1,0 +1,73 @@
+<VirtualHost _default_:443>
+        ServerAdmin webmaster@localhost
+
+        DBDriver mysql
+        DBDParams "dbname=munkicert,user=munkiuser,pass=munkipass"
+
+        DocumentRoot /var/www/roots
+        <Directory "/">
+                Options FollowSymLinks
+                AllowOverride None
+        </Directory>
+
+# may not need this anymore
+        <Location "/shared">
+          deny from all
+        </Location>
+
+
+        Alias "/Portal" "/var/www/portal"
+        <Directory "/var/www/portal">
+                    Options Indexes FollowSymLinks MultiViews
+                   Require all granted              
+        </Directory>
+
+        <Location /Portal/api>
+                  RewriteEngine On
+                  RewriteCond %{REQUEST_FILENAME} !-f
+                  RewriteCond %{REQUEST_FILENAME} !-d
+                  RewriteRule /api/v1/(.*)$ /Portal/api/v1/api.php?request=$1 [QSA,NC,L]
+        </Location>
+        <Location /api>
+                  RewriteEngine On
+                  RewriteCond %{REQUEST_FILENAME} !-f
+                  RewriteCond %{REQUEST_FILENAME} !-d
+                  RewriteRule /api/v1/(.*)$ /Portal/api/v1/api.php?request=$1 [QSA,NC,L]
+        </Location>
+
+# for local logins.  Somewhat abandoned.  Remove?
+        <Location /Portal/api/v1/login/basic>
+                   AuthType Basic
+                   AuthName "Munki Portal"
+                   Require valid-user
+                   AuthBasicProvider file
+                   AuthUserFile /var/www/portalpassword
+        </Location>
+
+# for Shibboleth logins
+        <Location /Portal/api/v1/login/shib>
+                   AuthType shibboleth
+                   ShibRequireSession On
+                   AuthName "Munki Portal"
+                   Require valid-user
+        </Location>
+
+        include /etc/apache/conf/munki-conf-per-group/munkirepo-*.conf
+
+# add authentication for this?
+        <Directory "/var/www/roots/ONBOARD">
+          <FilesMatch "munkiconfig.*\.pkg$">
+            SetHandler application/x-httpd-php
+          </FilesMatch>
+        </Directory>
+
+# may not need indexes
+        <Directory "/var/www/roots/">
+                Options Indexes FollowSymLinks MultiViews
+                AllowOverride None
+                Require all granted
+                RedirectMatch ^/$ /Portal/
+        </Directory>
+
+
+</VirtualHost>
