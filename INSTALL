@@ -1,0 +1,72 @@
+Installation instructions for Multi-Tenant Munki.
+
+These are more notes than real install instructions.  They hopefully
+will become real install instructions at some point.
+
+This package has several pieces.  These need to be placed in several
+places on the filesystem.  Also, a new user needs to be created,
+'makemunki'.  The web server needs to be able to run a script as
+makemunki.  On Debian, the web server runs as www-data, so a line is
+needed in the sudoers file granting permission.  To create the user,
+do something like this:
+
+# sudo adduser --system makemunki --shell /bin/bash --group
+
+Next, add a line in your sudoers file that looks like this.  Note, you
+may need to add '!requiretty' at the end if your sudoers file requires
+a valid tty to operate.
+
+# www-data ALL=(makemunki) NOPASSWD:/etc/makemunki/sign_certificate.sh
+
+Now, copy the files from the 'home' folder to makemunki's home
+directory:
+
+# cd home && sudo cp -R . ~makemunki
+# sudo chown -R makemunki:makemunki ~makemunki
+# sudo chmod 1777 ~makemunki/tmp
+
+While we're at it, let's set up the makemunki config in etc:
+
+# sudo mkdir /etc/makemunki
+# sudo chown makemunki:makemunki /etc/makemunki
+
+Now, generate the new signing key for the makemunki system, and stub configs:
+
+# sudo /bin/su - makemunki
+# ./gen-munki-CAcert.bash /etc/makemunki '/C=Whatever you want/OU=blah'
+# cd /etc/makemunki
+# cp /path/to/your/MTM/etcmakemunki/* /etc/makemunki
+
+Set up a sitekey for encryption.  Edit /etc/makemunki/sitekey.  Type
+32 random characters.  It should start with 32 numbers to guide you.
+DON'T LEAVE THIS AS 32 NUMBERS.
+
+Time to edit some config files for MTM.  /etc/makemunki/config is a
+text file, Windows(TM) INI format, to configure things.  Edit this
+with your favorite text editor.  Most of the values are
+self-explanatory, or have a note as to what they mean.  To change the
+LDAP password used to look up groups in AD, change to the mtm
+directory and run
+
+# php change_ldap_pass.php
+
+You should be prompted for a new password.  This generates and prints an
+encrypted string that can be copied to /etc/makemunki/config.  Note
+that you want to have the sitekey set first.  Any change to the
+sitekey or eth0's MAC address will invalidate this password.
+
+Now it's time to create the database.  To create the database, log in
+to mysql as a root user and grant privileges.  Note that this should
+be scripted in the future.  This needs to be done as a privileged user
+as some views are created that are only creatable by a privileged
+user.  After creation, everything can be done with a less privileged
+user.
+
+# mysql -uroot
+MariaDB [(none)]> grant all on munkicert.* to munkiuser@localhost identified by 'munkipass';
+MariaDB [(none)]> create database munkicert;
+MariaDB [(none)]> use munkicert;
+MariaDB [munkicert]> \. <path to MTM>/munkicert-schema.sql
+
+Time to get the apache configs set up.
+
