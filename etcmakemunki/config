@@ -1,0 +1,42 @@
+; configs for everything.
+[main]
+codehome = /home/someplace/mtm
+; baseurl should not have a trailing '/' character.
+baseurl = https://munkibusiness.mydomain.edu
+fullrepopath = /var/www/repos
+urlrepobase = /repos
+mkpackagedir = /home/makemunki
+mkpackagesrc = /home/makemunki/munkiconfig-pack
+timezone = America/Chicago
+
+; This section defines certificate authority configs
+[CA]
+sslconffile = /etc/makemunki/ca.conf
+certbits = 2048
+cadefaultsection = CA_default
+cacertpath = /etc/makemunki/rootCA.pem
+cakeypath = /etc/makemunki/rootCA.key
+cadays = 3652
+casubjectbase = "/C=US/ST=Illinois/O=University of Illinos/OU=Endpoint Services Development"
+
+; this section defines database connections
+[db]
+dbname = munkicert
+dbhost = localhost
+dbuser = munkiuser
+dbpass = munkipass
+
+[portal]
+session_lifetime = 86400
+maximum_window = 20160 ; in minutes = 14 days
+
+[apache]
+per_repo_config = /etc/apache/conf/munki-conf-per-group
+
+[ldap]
+ldapuri = "ldaps://ad.uillinois.edu/"
+username = "munkiaccountwithprivilegesofsomekind@ad.uillinois.edu"
+password = "secret" ; see ldappasswd.php to change this password.
+basedn = "DC=ad,DC=uillinois,DC=edu"
+dnattribute = sAMAccountName
+

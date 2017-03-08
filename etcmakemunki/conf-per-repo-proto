@@ -1,0 +1,20 @@
+## %%REPONAME%%
+## %%DESCRIPTION%%
+#
+# Note that this directory context is not a subdirectory of
+# a location where most of the necessary certificate authentication
+# directives are in place.
+<Directory "%%REPOBASEPATH%%/%%FULLPATH%%">
+  # Dummy query to allow cert faked auth to work.
+  SSLVerifyClient require
+  SSLVerifyDepth  1
+  SSLOptions +StdEnvVars +FakeBasicAuth
+  AuthType Basic
+  AuthName MunkiRepo-%%REPONAME%%
+  AuthBasicProvider dbd
+  AuthBasicAuthoritative On
+  AuthDBDUserPWQuery "SELECT 'xxj31ZMTZzkVA'"
+  require dbd-group %%FULLPATH%%
+  AuthZDBDQuery "SELECT fullpath FROM Repository,Computer,Certificate WHERE Computer.Certificate_ID = Certificate.ID AND Repository.ID = Computer.Repository_ID and subject = %s"
+</Directory>
+
