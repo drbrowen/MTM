@@ -36,7 +36,7 @@ per_repo_config = /etc/apache/conf/munki-conf-per-group
 [ldap]
 ldapuri = "ldaps://ad.uillinois.edu/"
 username = "munkiaccountwithprivilegesofsomekind@ad.uillinois.edu"
-password = "secret" ; see ldappasswd.php to change this password.
+password = "secret" ; see mtm/change_ldap_pass.php to change this password.
 basedn = "DC=ad,DC=uillinois,DC=edu"
 dnattribute = sAMAccountName
 
