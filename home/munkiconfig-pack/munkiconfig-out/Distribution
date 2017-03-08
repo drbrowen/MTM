@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<installer-script authoringTool="com.apple.PackageMaker" authoringToolVersion="3.0.4" authoringToolBuild="179" minSpecVersion="1">
+    <title>MunkiConfig - Configure Munki for Illinois</title>
+    <options customize="allow" allow-external-scripts="no"/>
+    <domains enable_anywhere="true"/>
+    <choices-outline>
+        <line choice="config"/>
+    </choices-outline>
+    <choice id="config" title="Munki configuration"
+	    description="Configures Munki to use the shared Munki Service">
+        <pkg-ref id="edu.illinois.munkiconfig"/>
+    </choice>
+    <pkg-ref id="edu.illinois.munkiconfig" installKBytes="3" version="3.0.0" auth="Root">#munkiconfig-3.0.0.pkg</pkg-ref>
+</installer-script>

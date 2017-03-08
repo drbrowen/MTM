@@ -1,0 +1,54 @@
+<header>
+  <h1 class="text-center">Repository Permission Management</h1>
+</header>
+
+<div ng-show="lastresults">
+  <h3>Previous Action Results: {{errortext}}</h3>
+  <p>{{resulttext}}</p>
+</div>
+
+<div ng-show="goodresults">
+  <h3>Repository</h3>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-6 col-md-3" align="right">Repository Name Name</div>
+      <div class="col-xs-6 col-md-3"><a ng-click="gorepo()">{{perms.repository_name}}</a></div>
+    </div>
+  </div>
+
+  <h3>User Group</h3>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-6 col-md-3" align="right">User Group Name</div>
+      <div class="col-xs-6 col-md-3"><a ng-click="gousergroup()">{{perms.usergroup_name}}</a></div>
+    </div>
+  </div>
+
+  <form  class="simple-form">
+    
+  <h3>Permissions:</h3>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-4 col-md-2" align="right">Portal Permission</div>
+      <div class="col-xs-2 col-md-2"><input type="checkbox" ng-model="portalpermbit_V"/>View</div>
+      <div class="col-xs-2 col-md-2"><input type="checkbox" ng-model="portalpermbit_C"/>Computers</div>
+      <div class="col-xs-2 col-md-2"><input type="checkbox" ng-model="portalpermbit_G"/>Group</div>
+      <div class="col-xs-2 col-md-2"><input type="checkbox" ng-model="portalpermbit_S"/>Subgroup</div>
+    </div>
+    <div class="row">
+      <div class="col-xs-4 col-md-2" align="right">Repository Permission</div>
+      <div class="col-xs-2 col-md-2"><input type="checkbox" ng-model="repositorypermbit_R"/>Read</div>
+      <div class="col-xs-2 col-md-2"><input type="checkbox" ng-model="repositorypermbit_W"/>Write</div>
+    </div>
+  </div>
+
+  <input type="submit" ng-click="edit_save()" value="Save"/>
+  <div ng-show="showback"><input type="submit" ng-click="goback()" value="Cancel"/></div>
+  <!--<input type="submit" ng-click="edit_cancel()" value="Cancel"/>-->
+  
+  </form>
+
+</div>
+
+</body>
+</html>

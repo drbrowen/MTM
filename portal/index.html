@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+
+<head>
+   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.28/angular.js">
+   </script>
+   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.28/angular-resource.js">
+   </script>
+   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.28/angular-route.js">
+   </script>
+   <script src="components/dirPagination.js"></script>
+   <script src="components/smart-table.min.js"></script>
+   <script src="app.js"></script>
+   <script src="ComputerService.js"></script>
+   <script src="GroupService.js"></script>
+   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css"/>
+   <link rel="stylesheet" href="mainstyle.css"/>
+   <meta charset="utf-8">
+   <title>Munki Computer Certificate Portal</title>
+</head>
+<body>
+<div class="banner"><img alt="University of Illinois" src="uillinois-wordmark-large.png"/></div>
+<a href="/Portal/#/">Home</a>
+<div ng-view></div>
+</body>
+
+</html>
+

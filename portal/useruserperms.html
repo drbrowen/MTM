@@ -1,0 +1,48 @@
+<header>
+  <h1 class="text-center">Permission Management</h1>
+</header>
+
+<div ng-show="lastresults">
+  <h3>Previous Action Results: {{errortext}}</h3>
+  <p>{{resulttext}}</p>
+</div>
+
+<div ng-show="goodresults">
+  <h3>Target User Group</h3>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-6 col-md-3" align="right">Target User Group Name</div>
+      <div class="col-xs-6 col-md-3"><a ng-click="gotargetgroup()">{{perms.target_usergroup_name}}</a></div>
+    </div>
+  </div>
+
+  <h3>Acting User Group</h3>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-6 col-md-3" align="right">Acting User Group Name</div>
+      <div class="col-xs-6 col-md-3"><a ng-click="gousergroup()">{{perms.acting_usergroup_name}}</a></div>
+    </div>
+  </div>
+
+  <form  class="simple-form">
+    
+  <h3>Permissions:</h3>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-4 col-md-2" align="right">Portal Permission</div>
+      <div class="col-xs-2 col-md-2"><input type="checkbox" ng-model="portalpermbit_R"/>Read</div>
+      <div class="col-xs-2 col-md-2"><input type="checkbox" ng-model="portalpermbit_W"/>Write</div>
+      <div class="col-xs-2 col-md-2"><input type="checkbox" ng-model="portalpermbit_D"/>Delete</div>
+    </div>
+  </div>
+
+  <input type="submit" ng-click="edit_save()" value="Save"/>
+  <div ng-show="showback"><input type="submit" ng-click="goback()" value="Cancel"/></div>
+  <!--<input type="submit" ng-click="edit_cancel()" value="Cancel"/>-->
+  
+  </form>
+
+</div>
+
+</body>
+</html>

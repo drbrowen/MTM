@@ -1,0 +1,50 @@
+<header>
+  <div ng-show="showadd"><h1 class="text-center">Add Computers</h1></div>
+  <div ng-show="showedit"><h1 class="text-center">Edit Computers</h1></div>
+</header>
+
+<div ng-show="lastresults">
+  <h3>Previous Action Results: {{errortext}}</h3>
+  <p>{{resulttext}}</p>
+</div>
+
+<div>
+  <form  class="simple-form">
+    <div class="container">
+      <div class="row">
+	<div class="col-xs-6 col-md-3" align="right">Name*</div>
+	<div class="col-xs-6 col-md-3"><input type="text" ng-model="form_name" ng-required="1" /></div>
+      </div>
+
+      <div class="row">
+	<div class="col-xs-6 col-md-3" align="right">Serial Number*</div>
+	<div class="col-xs-6 col-md-3"><input type="text" ng-model="form_identifier" ng-required="1" /></div>
+      </div>
+
+      <div class="row">
+	<div class="col-xs-6 col-md-3" align="right">Repository</div>
+	<div class="col-xs-6 col-md-3"><select ng-model="form_repo" ng-options="repo as repo.fullpath for repo in repos track by repo.id"></select></div>
+      </div>
+      
+      <div class="row">
+	<div class="col-xs-6 col-md-3" align="right">Window (Minutes)*</div>
+	<div class="col-xs-6 col-md-3"><input type="text" ng-model="form_window" ng-required="showadd" /></div>
+      </div>
+
+      <div class="row">
+	<div class="col-xs-6 col-md-3" align="right">Client Identifier (blank for defaults)</div>
+	<div class="col-xs-6 col-md-3"><input type="text" ng-model="form_forced_clientidentifier" /></div>
+      </div>
+
+      <div class="row">
+	<div class="col-xs-6 col-md-3" align="right">Force Rename</div>
+	<div class="col-xs-6 col-md-3"><input type="checkbox" ng-model="form_rename_on_install" /></div>
+      </div>
+      
+    </div>
+    <div ng-show="showadd"><input type="submit" ng-click="computers_add()" value="Add Computer"/></div>
+    <div ng-show="showedit"><input type="submit" ng-click="computer_update()" value="Update Computer"/></div>
+    <input type="button" ng-click="edit_cancel()" value="Cancel Page"/>
+  </form>
+</div>
+
