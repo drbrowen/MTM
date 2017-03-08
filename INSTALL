@@ -70,3 +70,9 @@ MariaDB [munkicert]> \. <path to MTM>/munkicert-schema.sql
 
 Time to get the apache configs set up.
 
+Automatic base-level apache configuration has not yet been done.  In
+the apache directory are two snippets of apache configuration files.
+These need to be incorporated into the normal apache configs.  Note
+that this apache install needs to listen (for this configuration, at
+least) to ports 443 and 3443.  DAV is on 3443 while the portal and
+munki clients access 443.
