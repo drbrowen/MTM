@@ -1,0 +1,24 @@
+This is the Multi-Tenant Munki package.  It is being developed on
+linux, however it should run on any *nix system capable of running
+apache2.4, php, and MySQL (or MariaDB).  The encryption package uses
+the MAC address as a salt.  If you don't have linux with eth0, you may
+need to edit the file to get entropy from elsewhere.
+
+Requirements:
+
+Apache2.4
+  php + pdo + ssl (tested in php5.5)
+  mod_dav
+  authnz_ldap (For WebDAV authentication)
+  authn_db
+  authz_db
+  mod_rewrite
+
+Shibboleth providing the "member" or "isMemberOf" attribute
+  (Somewhat loosely coupled, but still coupled more tightly than
+  it probably should be).
+
+AD server (Somewhat loosely coupled, but still....)
+
+Mysql or MariaDB (We develop/test on MariaDB) with innodb support.
+

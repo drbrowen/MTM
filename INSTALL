@@ -16,7 +16,7 @@ Next, add a line in your sudoers file that looks like this.  Note, you
 may need to add '!requiretty' at the end if your sudoers file requires
 a valid tty to operate.
 
-# www-data ALL=(makemunki) NOPASSWD:/etc/makemunki/sign_certificate.sh
+www-data ALL=(makemunki) NOPASSWD:/etc/makemunki/sign_certificate.sh
 
 Now, copy the files from the 'home' folder to makemunki's home
 directory:
@@ -25,7 +25,7 @@ directory:
 # sudo chown -R makemunki:makemunki ~makemunki
 # sudo chmod 1777 ~makemunki/tmp
 
-While we're at it, let's set up the makemunki config in etc:
+While you're at it, set up the makemunki config in etc:
 
 # sudo mkdir /etc/makemunki
 # sudo chown makemunki:makemunki /etc/makemunki
@@ -42,7 +42,7 @@ Set up a sitekey for encryption.  Edit /etc/makemunki/sitekey.  Type
 DON'T LEAVE THIS AS 32 NUMBERS.
 
 Time to edit some config files for MTM.  /etc/makemunki/config is a
-text file, Windows(TM) INI format, to configure things.  Edit this
+text file, Windows(tm) INI format, to configure things.  Edit this
 with your favorite text editor.  Most of the values are
 self-explanatory, or have a note as to what they mean.  To change the
 LDAP password used to look up groups in AD, change to the mtm
@@ -68,6 +68,14 @@ MariaDB [(none)]> create database munkicert;
 MariaDB [(none)]> use munkicert;
 MariaDB [munkicert]> \. <path to MTM>/munkicert-schema.sql
 
+Now get the PHP database access files.  Change to the MTM directory
+and run
+
+# php make_dblayer.php munkicert.xml
+
+This should create a new directory called "MunkiCert".
+
+
 Time to get the apache configs set up.
 
 Automatic base-level apache configuration has not yet been done.  In
@@ -76,3 +84,11 @@ These need to be incorporated into the normal apache configs.  Note
 that this apache install needs to listen (for this configuration, at
 least) to ports 443 and 3443.  DAV is on 3443 while the portal and
 munki clients access 443.
+
+There is an include line in both of these apache config files.  This
+line includes a config file generated per repository.  Apache may not
+start if there are no initial files to include, as you have no
+repository.  To fix this, you can do something like this:
+
+# touch /path/to/apache/include/munkirepo-null.conf
+# touch /path/to/apache/include/munkirepo-null.dav
