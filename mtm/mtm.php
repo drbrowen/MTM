@@ -49,7 +49,13 @@ class MTM  {
         $subject = $this->gconf->CA->casubjectbase.'/CN='.$comp->identifier;
         $certs = T_Certificate::search(['subject','status'],[$subject,'V'],['=','=']);
         if(count($certs)!=0) {
-            throw new exception("Certificate for this identifier already exists.");
+            if($comp->status !== "reopened") {
+                throw new exception("Certificate for this identifier already exists.");
+            } else {
+                $comp->status = 'issued';
+                $comp->save();
+                return $comp;
+            }
         }
 
         $cert = new T_Certificate;
@@ -57,7 +63,9 @@ class MTM  {
         $cert->subject = $subject;
         $cert->save();
 
-        $results = shell_exec("sudo -u makemunki /etc/makemunki/sign_certificate.sh ".$cert->ID);
+        //$results = shell_exec("sudo -u makemunki /etc/makemunki/sign_certificate.sh ".$cert->ID);
+        // Hack as sudo isn't working properly on this machine.
+        $results = shell_exec("/etc/makemunki/sign_certificate.sh ".$cert->ID);
         file_put_contents("/var/storage/phpsessions/mtmout","Received results: ".$results."\n");
 
         $certs = T_Certificate::search('ID',$cert->ID);
@@ -302,7 +310,12 @@ class MTM  {
     }
 
     public function computers_by_subject($in_subject,$in_user = 'root',$in_flags = 0) {
-        $computers = T_Computer::search('subject',$in_subject);
+        $certificates = T_Certificate::search('subject',$in_subject);
+        if(count($certificates)!=1) {
+            throw new exception('Computer certificate does not exist');
+        }
+
+        $computers = T_Computer::search('Certificate_ID',$certificates[0]->ID);
 
         if(count($computers) != 1) {
             throw new exception('Computer does not exist');
