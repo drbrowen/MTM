@@ -16,7 +16,7 @@ import keychain
 keychain_obj = keychain.MunkiKeychain()
 
 print "Fetching latest update code"
-fullURL = munkicommon.pref('SoftwareRepoURL') + '/pkgs/global_free/MTM.reconfigure/00_MTM.reconfigure-core'
+fullURL = munkicommon.pref('SoftwareRepoURL') + '/MTM.reconfigure/00_MTM.reconfigure-core'
 
 fetch.getResourceIfChangedAtomically(fullURL,'/usr/local/munki/00_MTM.reconfigure-core')
 

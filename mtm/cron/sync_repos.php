@@ -119,6 +119,7 @@ foreach($repos as $repo) {
     '%%FULLPATH%%' => $repo['fullpath'],
     '%%ACCESSES%%' => $accesses,
     '%%REWRITERULES%%' => $aliaslines,
+    '%%RECONFIGPATH%%' => $gconf->main->mtmreconfigdir,
     '%%DESCRIPTION%%' => str_replace("\n","\n##",$repo['description'])];
 
     $outfile = $protorepofile;
