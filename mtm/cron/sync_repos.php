@@ -38,6 +38,7 @@ function gen_alias_lines($fullpath,$repos,$gconf) {
         $parentpath = '/'.implode('/',$pathpieces);
         $parentname = str_replace('/','-',substr($parentpath,1));
         $ret .= "RewriteRule \"^".$gconf->main->urlrepobase.$fullpath.'/([^/]+)/'.$repos[$parentpath]['fileprefix']."(.*)\" ".$gconf->main->fullrepopath.$parentpath.'/$1/'.$repos[$parentpath]['fileprefix'].'$2'."\n";
+        $ret .= "RewriteRule \"^/".$reponame.'/([^/]+)/'.$repos[$parentpath]['fileprefix']."(.*)\" ".$gconf->main->fullrepopath.$parentpath.'/$1/'.$repos[$parentpath]['fileprefix'].'$2'."\n";
     }
 
     //$ret .= "AliasMatch \"^/".$fullpath.'/'."\" \"".$gconf->main->fullrepopath.$fullpath."/\"\n";
@@ -104,9 +105,20 @@ foreach($repos as $repo) {
         create_repo_dir($repodir);
     }
 
+    $accesses = "";
+    foreach($repos as $rfp => $repodata) {
+        if(substr($rfp,0,strlen($repo['fullpath'])) === $repo['fullpath']) {
+            $accesses .= "  require dbd-group ".$rfp."\n";
+        }
+    }
+        
+    $aliaslines = gen_alias_lines($repo['fullpath'],$repos,$gconf);
+
     $mods = [ '%%REPOBASEPATH%%'=>$gconf->main->fullrepopath,
     '%%REPONAME%%'=>$reponame,
     '%%FULLPATH%%' => $repo['fullpath'],
+    '%%ACCESSES%%' => $accesses,
+    '%%REWRITERULES%%' => $aliaslines,
     '%%DESCRIPTION%%' => str_replace("\n","\n##",$repo['description'])];
 
     $outfile = $protorepofile;
@@ -114,10 +126,6 @@ foreach($repos as $repo) {
         $tmp = str_replace($key,$repl,$outfile);
         $outfile = $tmp;
     }
-
-    $aliaslines = gen_alias_lines($repo['fullpath'],$repos,$gconf);
-
-    $outfile .= $aliaslines;
 
     file_put_contents($gconf->apache->per_repo_config."/munkirepo-".$reponame.".conf",$outfile);
 
@@ -138,7 +146,7 @@ foreach($repos as $repo) {
         }
     }
     $davconf = "";
-    $davconf .= "<Directory \"".$gconf->main->fullrepopath."/".$reponame."\">\n";
+    $davconf .= "<Directory \"".$gconf->main->fullrepopath.$reponame."\">\n";
     $davconf .= "  <LimitExcept PROPFIND GET OPTIONS>\n";
     // Only write individual requirements if we have at least 1 write group
     if(count($requireWrepos)>0) {
