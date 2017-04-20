@@ -63,9 +63,9 @@ class MTM  {
         $cert->subject = $subject;
         $cert->save();
 
-        //$results = shell_exec("sudo -u makemunki /etc/makemunki/sign_certificate.sh ".$cert->ID);
+        $results = shell_exec("sudo -u makemunki /etc/makemunki/sign_certificate.sh ".$cert->ID);
         // Hack as sudo isn't working properly on this machine.
-        $results = shell_exec("/etc/makemunki/sign_certificate.sh ".$cert->ID);
+        //$results = shell_exec("/etc/makemunki/sign_certificate.sh ".$cert->ID);
         file_put_contents("/var/storage/phpsessions/mtmout","Received results: ".$results."\n");
 
         $certs = T_Certificate::search('ID',$cert->ID);
@@ -779,7 +779,7 @@ class MTM  {
         $user = $users[0];
 
         $usergroups = T_UserGroup::search('ID',$in_usergroupID);
-        if(count($users)!=1) {
+        if(count($usergroups)!=1) {
             throw new exception("Cannot find group");
         }
         $usergroup = $usergroups[0];

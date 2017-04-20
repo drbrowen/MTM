@@ -118,8 +118,30 @@ class CA_Access {
         $cert->signrequest = $csr;
 
         $certconfig = array('config'=>$this->gconf->CA->sslconffile,'config_section_name'=>$this->gconf->CA->cadefaultsection);       
+
+        ob_start();
+        var_dump($csrraw);
+        var_dump($cacert);
+        var_dump($cakey);
+        var_dump($this->gconf->CA->cadays);
+        var_dump($certconfig);
+        var_dump($cert->ID);
+        $rawdata = ob_get_clean();
+        file_put_contents("/var/storage/phpsessions/certparams",$rawdata);
         
         $rawcert = openssl_csr_sign($csrraw,$cacert,$cakey,$this->gconf->CA->cadays,$certconfig,$cert->ID);
+
+        ob_start();
+        var_dump($csrraw);
+        var_dump($cacert);
+        var_dump($cakey);
+        var_dump($this->gconf->CA->cadays);
+        var_dump($certconfig);
+        var_dump($cert->ID);
+        var_dump($rawcert);
+        print openssl_error_string();
+        $rawdata = ob_get_clean();
+        file_put_contents("/var/storage/phpsessions/certparams",$rawdata);
 
         $vals = openssl_x509_export($rawcert,$pem);
         $cert->certificate = $pem;

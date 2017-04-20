@@ -47,6 +47,7 @@ $mtm->change_usergroup_permission_for_usergroup($globgroupraw->ID,'root',$change
 $sa->add_shibgroup_to_usergroup($adgroup,$globgroupraw->ID,'root');
 
 $repo = new T_Repository;
+$repo->name = 'global';
 $repo->fullpath = "/global";
 $repo->fileprefix = "global";
 $repo->description =  'Base global repository, content available to all repos';
