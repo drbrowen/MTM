@@ -12,8 +12,6 @@ ComputerService.factory("myErrorHandler",function($window) {
 	if(angular.isDefined(data.status) && angular.isDefined(data.status.error) && data.status.error == 2) {
 	    var landingURL = "https://" + $window.location.host +
 		"/Portal/api/v1/login/";
-	    console.log(landingURL);
-	    console.log($window.location);
 	    $window.open(landingURL,"_blank");
 	}
 		      
@@ -37,7 +35,6 @@ ComputerService.factory("Computer",function($resource,myErrorHandler) {
 		       isArray:true,
 		       transformResponse: function(data) {return myErrorHandler.format(data)},
 		       interceptor: {responseError: myErrorHandler.doit}}
-
     });
 
     Comp.setlastresults = function(current_results) {
@@ -84,7 +81,7 @@ app.filter('range', function() {
     }
 });
 
-app.controller("ComputerController",function($scope,$routeParams,Computer,$location) {
+app.controller("ComputerController",function($scope,$routeParams,Computer,$location,$window) {
     var editindex = 0;
 
     $scope.itemsperpage = 10;
@@ -130,11 +127,11 @@ app.controller("ComputerController",function($scope,$routeParams,Computer,$locat
     $scope.computersearch = function() {
 	Computer.setlastresults([]);
 	$location.url('/computers/search/repo/' + $scope.form_repo.id);
-    };
+    }
     
     $scope.setedit = function($activeID) {
 	$location.url('/computers/edit/id/' + $activeID);
-    };
+    }
 
     $scope.processdata = function(data) {
 	if(data.length < 1) {
@@ -146,13 +143,19 @@ app.controller("ComputerController",function($scope,$routeParams,Computer,$locat
 	    $scope.computers = data;
 	    $scope.displaycomputers = [] . concat($scope.computers);
 	}
-    };
+    }
 
     $scope.goadd = function() {
     	Computer.setlastresults({});
     	$location.url('/computers/edit/new/' + $scope.form_repo.id);
-    };
+    }
 
+    $scope.getcsv = function() {
+	var landingURL = "https://" + $window.location.host +
+	    "/Portal/api/v1/computers/csv/" + $scope.form_repo.id;
+	$window.open(landingURL,"_self");
+
+    }
 });
 
 app.controller("ComputerEditController",function($scope,$location,$routeParams,Computer) {

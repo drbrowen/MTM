@@ -81,12 +81,30 @@ class MyAPI extends API
 
             case 'id':
                 $mtm = new MTM;
-                return $mtm->computers_by_ID($this->args[0],$_SESSION['user'],MTM::FLAGS_REPO_PATH);
+                try {
+                    return $mtm->computers_by_ID($this->args[0],$_SESSION['user'],MTM::FLAGS_REPO_PATH);
+                } catch(exception $e) {
+                    return ['status'=>['error'=>1,'text'=>$e->getMessage()]];
+                }
                 break;
-                
+
             case 'repo':
                 $mtm = new MTM;
-                return $mtm->computers_by_repository($this->args[0],$_SESSION['user'],MTM::FLAGS_REPO_PATH);
+                try {
+                    return $mtm->computers_by_repository($this->args[0],$_SESSION['user'],MTM::FLAGS_REPO_PATH);
+                } catch(exception $e) {
+                    return ['status'=>['error'=>1,'text'=>$e->getMessage()]];
+                }
+                break;
+
+            case 'csv':
+                $this->settype("text/csv");
+                $mtm = new MTM;
+                try {
+                    return $mtm->get_csv_for_repository($this->args[0],$_SESSION['user']);
+                } catch(exception $e) {
+                    return ['status'=>['error'=>1,'text'=>$e->getMessage()]];
+                }
                 break;
 
             default:

@@ -1300,6 +1300,37 @@ class MTM  {
         return $add->ID;
     }    
 
+// This generates/uploads CSV files
+
+    public function get_csv_for_repository($repositoryID,$in_user = 'root') {
+        $repos = T_Repository::search('ID',$repositoryID);
+        if(count($repos)!=1) {
+            throw new exception("You do not have permissions for this repository.");
+        }
+        $repo = $repos[0];
+        if($in_user !== 'root' && !$this->check_user_perm_for_repository($in_user,$repo->fullpath,'P','V')) {
+            throw new exception("You do not have permissions for this repository.");
+        }
+
+        $computers = T_Computer::search('Repository_ID',$repo->ID);
+        $output = "Repository,Name,Serial Number,Client Identifier,Rename on Install,Status(ro),Window Start(ro),Window Close(ro)\n";
+
+        foreach($computers as $computer) {
+            $output .= join(',',
+            [$repo->fullpath,
+            $computer->name,
+            $computer->identifier,
+            $computer->forced_clientidentifier,
+            $computer->rename_on_install,
+            $computer->status,
+            $computer->window_start_date,
+            $computer->window_close_date])."\n";
+        }
+
+        return $output;
+            
+    }
+
 
 // Just separating slightly different types of thingies here.
     

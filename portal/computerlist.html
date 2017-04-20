@@ -11,6 +11,7 @@
   Limit to Repository: <select ng-model="form_repo" ng-options="repo as repo.fullpath for repo in repos track by repo.id"></select>
   <input type="submit" ng-click="computersearch()" value="Limit List"/>
   <input type="submit" ng-click="goadd()" value="Add New" />
+  <input type="submit" ng-click="getcsv()" ng-href="{{ url }}" value="Download as CSV"/>
 </form>
 
 <div ng-show="goodresults">
