@@ -32,7 +32,7 @@ class MunkiPackage {
 <dict>
   <key>SuccessfulInstall</key>
   <true/>
-  <key>AppleSoftwareUpdateOnly</key>
+  <key>AppleSoftwareUpdatesOnly</key>
   <false/>
   <key>InstallAppleSoftwareUpdates</key>
   <true/>
@@ -54,7 +54,7 @@ class MunkiPackage {
   <string>';
             
         $URLpath = str_replace('/','-',substr($repo->fullpath,1));
-        $URL = $this->gconf->main->baseurl.'/'.$URLpath;
+        $URL = $this->gconf->main->baseurl.$URLpath;
 
         $plistout .= $URL."</string>\n";
         $fci = $comp->forced_clientidentifier;

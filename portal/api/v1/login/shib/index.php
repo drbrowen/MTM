@@ -77,21 +77,21 @@ if(isset($REMOTEUSER)) {
         exit(0);
     }        
 
-    print "<pre>";
-    var_dump($shib_user_groups);
-    print "</pre>";
+#    print "<pre>";
+#    var_dump($shib_user_groups);
+#    print "</pre>";
     // Look for groups needing to be added
     foreach($shib_user_groups as $shib_user_group_ID => $shib_user_group) {
         $found = 0;
         foreach($curgroups as $curgroup) {
-            print "Check for '".$shib_user_group_ID."' === '".$curgroup['id']."'\n";
-            if($curgroup['id'] === $shib_user_group_ID) {
+#            print "Check for '".$shib_user_group_ID."' === '".$curgroup['id']."'\n";
+            if($curgroup['id'] == $shib_user_group_ID) {
                 $found = 1;
             }
         }
         if($found == 0) {
             $mtm->put_user_in_usergroup($user_id,$shib_user_group_ID);
-            print "Added usergroup\n";
+#           print "Added usergroup\n";
         }
     }
 

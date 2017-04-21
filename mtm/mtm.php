@@ -785,8 +785,8 @@ class MTM  {
         $usergroup = $usergroups[0];
 
         // Search for the user in the group already.
-        $uiugs = T_User_in_UserGroup::search(['User_ID','UserGroup_ID'],[$in_userID,$in_groupID],['=','=']);
-        if(count($uiugs) == 0) {
+        $uiugs = T_User_in_UserGroup::search(['User_ID','UserGroup_ID'],[$in_userID,$in_usergroupID],['=','=']);
+        if(count($uiugs) < 1) {
             $uiug = new T_User_in_UserGroup;
             $uiug->User_ID = $user;
             $uiug->UserGroup_ID = $usergroup;
