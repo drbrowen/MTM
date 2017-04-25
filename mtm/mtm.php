@@ -1313,7 +1313,7 @@ class MTM  {
         }
 
         $computers = T_Computer::search('Repository_ID',$repo->ID);
-        $output = "Repository,Name,Serial Number,Client Identifier,Rename on Install,Status(ro),Window Start(ro),Window Close(ro)\n";
+        $output = "Repository,Name,Serial Number,Client Identifier,Rename on Install,Window,Status(ro),Window Start(ro),Window Close(ro)\n";
 
         foreach($computers as $computer) {
             $output .= join(',',
@@ -1322,6 +1322,7 @@ class MTM  {
             $computer->identifier,
             $computer->forced_clientidentifier,
             $computer->rename_on_install,
+            0,
             $computer->status,
             $computer->window_start_date,
             $computer->window_close_date])."\n";
@@ -1331,6 +1332,142 @@ class MTM  {
             
     }
 
+    private function _combine_array(&$row, $key, $header) {
+        $row = array_combine($header, $row);
+    }
+
+    public function load_csv_for_repository($params,$in_user = 'root') {
+        if(!isset($params['csv'])) {
+            throw new exception("load_csv_for_repository: csv not specified.");
+        }
+
+        $csvin = array_map('str_getcsv', explode(PHP_EOL,$params['csv']));
+
+        $header = array_shift($csvin);
+
+        if(!in_array('Repository',$header)) {
+            throw new exception("load_csv_for_repository: 'Repository' column not found in CSV");
+        }
+        if(!in_array('Serial Number',$header)) {
+            throw new exception("load_csv_for_repository: 'Serial Number' column not found in CSV");
+        }
+
+        array_walk($csvin, array($this,'_combine_array'), $header);
+
+        // Make a hash of all repos we see, so we can quickly get repo objects.
+        $seen_repos = [];
+        $add_comps = [];
+        $mod_comps = [];
+        // Ensure full permissions for each repository given as we load any repos seen.
+        // Decide if each computer is an add or is a modify.
+        foreach($csvin as $row) {
+            if(!isset($seen_repos[$row['Repository']])) {
+                if($in_user !== 'root' && !$this->check_user_perm_for_repository($in_user,$row['Repository'],'P','C')) {
+                    throw new exception("You do not have permissions for repository ".$row['Repository']);
+                }
+                $repos = T_Repository::search('fullpath',$row['Repository']);
+                $seen_repos[$row['Repository']] = $repos[0];
+            }
+
+            $computers = T_Computer::search('identifier',$row['Serial Number']);
+            if(count($computers)==0) {
+                $add_comps[] = $csvin;
+            } else {
+                $comp = $computer[0];
+                // Check that the repo isn't changing.
+                if($comp->Repository_ID != $seen_repos[$row['Repository']]->ID) {
+                    throw new exception("load_csv_for_repository: You can not change the repository for a computer in this interface.");
+                }
+                $tmp = [];
+                $tmp['csv'] = $row;
+                $tmp['computer'] = $comp;
+                $mod_comps[] = $tmp;
+            }
+
+        }
+
+
+        // Do 2 passes.  First we see if we _can_ change. Then we try the changes.  This way
+        // we usually won't stop mid-csv.
+
+        // Check what options we can change. Valid values are
+        // add=1 for add new entries (all others are ignored for an add)
+        // name=1 for changing name
+        // window=1 for reopening a window (window must be > 0)
+        // rename=1 for setting rename_on_install
+        // clientid=1 for forcing a client_identifier
+        // Note that the key is _always_ the identifier and cannot be changed.
+
+        // Check for adds
+        if(isset($params['add']) && $params['add'] == 1) {
+            if(!in_array('Name',$header) ||
+            !in_array('Window',$header) ||
+            !in_array('Client Identifier',$header) ||
+            !in_array('Rename on Install',$header)) {
+                throw new exception("load_csv_for_repository: For adds, CSV MUST have columns: 'Repository','Name','Serial Number','Window','Client Identifier','Rename on Install'");
+            }
+
+            foreach($add_comps as $addit) {
+                if(!(is_numeric($addit['Window']))) {
+                    throw new exception("load_csv_for_repository: Window '".$addit['Window']."' is not numeric for '".$addit['Serial Number']."'");
+                }
+                $checknames = T_Computer::Search(['name','Repository_ID'],[$addit['Name'],$seen_repos[$addit['Repository']]->ID],['=','=']);
+                if(count($checknames)!=0) {
+                    throw new exception("load_csv_for_repository: Name '".$addit['Name']."' already in use in repository.");
+                }
+                if($addit['Rename on Install'] !== '0' &&
+                $addit['Rename on Install'] !== '' &&
+                $addit['Rename on Install'] !== '1') {
+                    throw new exception("load_csv_for_repository: Rename on Install must be '0' (or blank) or '1' for '".$addit['Serial Number']."'");
+                }
+            }
+        } else {
+            // Only check these if we need to -- not allowed to add.
+            if(isset($params['name']) && $params['name'] == 1) {
+                if(!in_array('Name',$header)) {
+                    throw new exception("load_csv_for_repository: Can't modify computer name without 'Name' column");
+                }
+            }
+            
+            if(isset($params['window']) && $params['window'] == 1) {
+                if(!in_array('Window',$header)) {
+                    throw new exception("load_csv_for_repository: Can't modify window without 'Window' column");
+                }
+            }
+            
+            if(isset($params['rename']) && $params['rename'] == 1) {
+                if(!in_array('Rename on Install',$header)) {
+                    throw new exception("load_csv_for_repository: Can't modify rename on install without 'Rename on Install' column");
+                }
+            }
+            
+            if(isset($params['clientid']) && $params['clientid'] == 1) {
+                if(!in_array('Client Identifier',$header)) {
+                    throw new exception("load_csv_for_repository: Can't modify client identifier without 'Client Identifier' column");
+                }
+            }
+
+        }
+
+        
+        foreach($add_comps as $addit) {
+            $params = [];
+            $params['name'] = $addit['Name'];
+            $params['Repository_ID'] = $seen_repos[$addit['Repository']]->ID;
+            $params['identifier'] = $addit['Serial Number'];
+            $params['window'] = $addit['Window'];
+            if($addit['Client Identifier']!=='') {
+                $params['forced_clientidentifier'] = $addit['Client Identifier'];
+            }
+            if($addit['Rename on Install'] !=='') {
+                $params['rename_on_install'] = $addit['Rename on Install'];
+            }
+            $this->add_computer($params,$in_user);
+        }
+
+
+        return 0;
+    }
 
 // Just separating slightly different types of thingies here.
     

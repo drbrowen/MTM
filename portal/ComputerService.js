@@ -34,7 +34,12 @@ ComputerService.factory("Computer",function($resource,myErrorHandler) {
 		       url: "/api/v1/users/repositories",
 		       isArray:true,
 		       transformResponse: function(data) {return myErrorHandler.format(data)},
-		       interceptor: {responseError: myErrorHandler.doit}}
+		       interceptor: {responseError: myErrorHandler.doit}},
+	'csv': {method:'POST',
+		url: "/api/v1/computers/csv",
+		isArray:false,
+		transformResponse: function(data) {return myErrorHandler.format(data)},
+	       interceptor: {responseError: myErrorHandler.doit}},
     });
 
     Comp.setlastresults = function(current_results) {
@@ -280,6 +285,64 @@ app.controller("ComputerEditController",function($scope,$location,$routeParams,C
 	}
 	$scope.showadd = 0;
 	$scope.showedit = 1;
+    }
+    
+});
+
+app.directive('fileModel', ['$parse', function ($parse) {
+    return {
+        restrict: 'A',
+        link: function(scope, element, attrs) {
+            var model = $parse(attrs.fileModel);
+            var modelSetter = model.assign;
+            
+            element.bind('change', function(){
+                scope.$apply(function(){
+                    modelSetter(scope, element[0].files[0]);
+                });
+            });
+        }
+    };
+}]);
+
+app.controller("ComputerCSVController",function($scope,$location,Computer) {
+    $scope.uploadCSV = function() {
+	var reader = new FileReader();
+	reader.onload = function() {
+	    $scope.submit(reader.result);
+	}
+	reader.readAsText($scope.myfile);
+    }
+
+    var checklastresults = function() {
+	var theresults = Computer.getlastresults();
+	if(angular.isDefined(theresults.status)) {
+	    $scope.lastresults = 1;
+	    if(theresults['status']['error'] == 1){
+		$scope.errortext = 'ERROR';
+	    } else {
+		$scope.errortext = 'OK';
+	    }
+	    $scope.resulttext = theresults['status']['text'];
+	} else {
+	    $scope.lastresults = 0;
+	}
+    }
+
+    checklastresults();
+
+    $scope.submit = function(csv) {
+	Computer.csv({csv:csv,
+		      add:$scope.add,
+		      name:$scope.name,
+		      window:$scope.window,
+		      rename:$scope.rename,
+		      clientid:$scope.clientid},function(data) {
+			  if(angular.isDefined(data.status)) {
+			      Computer.setlastresults(data);
+			      checklastresults();
+			  }
+		      });
     }
     
 });

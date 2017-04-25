@@ -122,7 +122,7 @@ class MyAPI extends API
             #var_dump($this->verb);
             #var_dump($this->args);
             #$textdata = ob_get_clean();
-            #file_put_contents('/tmp/textdata',$textdata);
+            #file_put_contents('/var/storage/phpsessions/textdata',$textdata);
 
             switch($this->verb) {
             case '':
@@ -195,6 +195,40 @@ class MyAPI extends API
                         //file_put_contents('/tmp/exception',$e);
                         return ['status'=>['error'=>1,'text'=>$e->getMessage()]];
                     }
+                }
+                break;
+
+            case 'csv':
+                $mtm = new MTM;
+                #ob_start();
+                #var_dump($invars->csv);
+                #$debug = ob_get_clean();
+                #file_put_contents('/var/storage/phpsessions/startcsv',$debug);
+                try {
+                    $params = [];
+                    if(isset($invars->csv)) {
+                        $params['csv'] = $invars->csv;
+                    }
+                    if(isset($invars->add)) {
+                        $params['add'] = $invars->add;
+                    }
+                    if(isset($invars->name)) {
+                        $params['name'] = $invars->name;
+                    }
+                    if(isset($invars->window)) {
+                        $params['window'] = $invars->window;
+                    }
+                    if(isset($invars->clientid)) {
+                        $params['rename'] = $invars->rename;
+                    }
+                    if(isset($invars->clientid)) {
+                        $params['clientid'] = $invars->clientid;
+                    }
+                        
+                    $val = $mtm->load_csv_for_repository($params,$_SESSION['user']);
+                    return ['status'=>['error'=>0,'text'=>'OK']];
+                } catch (exception $e) {
+                        return ['status'=>['error'=>1,'text'=>$e->getMessage()]];
                 }
                 break;
 

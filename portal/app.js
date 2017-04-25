@@ -27,6 +27,11 @@ app.config(function($routeProvider,$locationProvider) {
 	    controller:'ComputerController'
 	})
 
+	.when('/computers/csv', {
+	    templateUrl:'computercsv.html',
+	    controller:'ComputerCSVController'
+	})
+
 	.when('/repositories', {
 	    redirectTo: '/repositories/search'
 	})
