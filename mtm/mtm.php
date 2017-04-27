@@ -1252,7 +1252,7 @@ class MTM  {
         // Make sure it doesn't already exist.
         $groupsearch = T_Repository::search('fullpath',$in_repository['fullpath']);
         if(count($groupsearch)!=0) {
-            throw new exception("add_repository: group already exists.");
+            throw new exception("add_repository: repository already exists.");
         }
         $cg = new T_Repository;
         $cg->name = $groupname;
