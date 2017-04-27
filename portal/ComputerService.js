@@ -332,12 +332,19 @@ app.controller("ComputerCSVController",function($scope,$location,Computer) {
     checklastresults();
 
     $scope.submit = function(csv) {
+	var add = ($scope.add?1:0);
+	var name = ($scope.name?1:0);
+	var window = ($scope.window?1:0);
+	var rename = ($scope.rename?1:0);
+	var clientid = ($scope.clientid?1:0);
+	var repo = ($scope.repository?1:0);
 	Computer.csv({csv:csv,
-		      add:$scope.add,
-		      name:$scope.name,
-		      window:$scope.window,
-		      rename:$scope.rename,
-		      clientid:$scope.clientid},function(data) {
+		      add:add,
+		      name:name,
+		      window:window,
+		      rename:rename,
+		      clientid:clientid,
+		      repository:repo},function(data) {
 			  if(angular.isDefined(data.status)) {
 			      Computer.setlastresults(data);
 			      checklastresults();

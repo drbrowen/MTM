@@ -200,10 +200,10 @@ class MyAPI extends API
 
             case 'csv':
                 $mtm = new MTM;
-                #ob_start();
-                #var_dump($invars->csv);
-                #$debug = ob_get_clean();
-                #file_put_contents('/var/storage/phpsessions/startcsv',$debug);
+                ob_start();
+                var_dump($invars);
+                $debug = ob_get_clean();
+                file_put_contents('/var/storage/phpsessions/startcsv',$debug);
                 try {
                     $params = [];
                     if(isset($invars->csv)) {
@@ -223,6 +223,9 @@ class MyAPI extends API
                     }
                     if(isset($invars->clientid)) {
                         $params['clientid'] = $invars->clientid;
+                    }
+                    if(isset($invars->repository)) {
+                        $params['repository'] = $invars->repository;
                     }
                         
                     $val = $mtm->load_csv_for_repository($params,$_SESSION['user']);
