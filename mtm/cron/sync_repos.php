@@ -7,6 +7,12 @@ $gconf = new ReadConfig("/etc/makemunki/config");
 
 set_include_path(get_include_path() . ':'.$gconf->main->codehome);
 
+$debug = 0;
+
+if(isset($argv[1]) && $argv[1] === '-d') {
+    $debug = 1;
+}
+
 include_once "mtm.php";
 include_once "shib_auth.php";
 
@@ -14,6 +20,28 @@ if(!isset($gconf->main->fullrepopath)) {
     throw new exception("You must set 'fullrepopath' under the 'main' section of the config file.");
 }
 
+if(!isset($gconf->apache->per_repo_config)) {
+    throw new exception("You must set 'per_repo_config' under the 'apache' section of the config file.");
+}
+
+if(!isset($gconf->apache->restart)) {
+    throw new exception("You must set 'restart' under the 'apache' section of the config file.");
+}
+
+$files = scandir($gconf->apache->per_repo_config."-temp");
+foreach($files as $file) {
+    if($file !== '.' && $file !== '..') {
+        unlink($gconf->apache->per_repo_config."-temp/".$file);
+    }
+}
+
+
+function debug_print($data) {
+    global $debug;
+    if($debug == 1) {
+        print $data;
+    }
+}
 
 function fullpathcompare($a,$b) {
     return strcmp($a['fullpath'],$b['fullpath']);
@@ -23,13 +51,113 @@ function create_repo_dir($repodir) {
     mkdir($repodir);
     $subdirs = [ 'pkgs','pkgsinfo','catalogs','manifests','icons','client_resources'];
     foreach ($subdirs as $subdir) {
-        mkdir($repodir.'/'.$subdir);
+        if(!is_dir($repodir.'/'.$subdir)) {
+            mkdir($repodir.'/'.$subdir);
+        }
+
+    }
+}
+
+function gen_stub_entries($repos,$gconf) { 
+    $subdirs = [ 'pkgs','pkgsinfo','catalogs','manifests','icons','client_resources'];
+    $masterfiles = [];
+    $masterdirs = [];
+    $allfiles = [];
+    $alldirs = [];
+    // Loop to see what we should have.
+    foreach($repos as $repo) {
+        $keysize = strlen($repo['fileprefix']);
+        $masterdirs[$repo['fullpath']] = [];
+        $masterfiles[$repo['fullpath']] = [];
+        $alldirs[$repo['fullpath']] = [];
+        $allfiles[$repo['fullpath']] = [];
+        foreach ($subdirs as $subdir) {
+            $scandir = $gconf->main->fullrepopath.$repo['fullpath']."/".$subdir;
+            $entries = scandir($scandir);
+            $masterdirs[$repo['fullpath']][$subdir] = [];
+            $masterfiles[$repo['fullpath']][$subdir] = [];
+            $allfiles[$repo['fullpath']][$subdir] = [];
+            $alldirs[$repo['fullpath']][$subdir] = [];
+            foreach($entries as $entry) {
+                if(is_dir($scandir."/".$entry)) {
+                    $alldirs[$repo['fullpath']][$subdir][$entry] = 1;
+                } else {
+                    $allfiles[$repo['fullpath']][$subdir][$entry] = 1;
+                }
+                if(strncmp($entry,$repo['fileprefix'],$keysize)==0) {
+                    if(is_dir($scandir."/".$entry)) {
+                        $masterdirs[$repo['fullpath']][$subdir][$entry] = 1;
+                    } else {
+                        $masterfiles[$repo['fullpath']][$subdir][$entry] = 1;
+                    }
+                }
+            }
+        }
+    }
+
+
+    // Loop to see what's there.  Add/Delete as appropriate.
+    foreach($repos as $repo) {
+        debug_print( "Processing for ".$repo['fullpath']."\n");
+        // Get each piece of the full path.  Note we drop the first '/' with a substr:
+        $pathpieces = explode('/',substr($repo['fullpath'],1));
+        while(($currentpiece = array_pop($pathpieces))) {
+            if(count($pathpieces) == 0) {
+                continue;
+            }
+            $parentpath = '/'.implode('/',$pathpieces);
+            $parentkey = $repos[$parentpath]['fileprefix'];
+            $parentkeysize = strlen($parentkey);
+            $fullpath = $gconf->main->fullrepopath.$repo['fullpath'];
+            debug_print("  processing $parentpath\n");
+            foreach($subdirs as $subdir) {
+                // First do deletes:
+                foreach($allfiles[$repo['fullpath']][$subdir] as $checkfile => $one) {
+                    if(strncmp($checkfile,$parentkey,$parentkeysize)==0) {
+                        if(!isset($masterfiles[$parentpath][$subdir][$checkfile])) {
+                            // Remove the file.
+                            debug_print( "Remove file $fullpath/$subdir/$checkfile\n");
+                            unlink("$fullpath/$subdir/$checkfile");
+                        }
+                    }
+                }
+                
+                foreach($alldirs[$repo['fullpath']][$subdir] as $checkfile => $one) {
+                    if(strncmp($checkfile,$parentkey,$parentkeysize)==0) {
+                        if(!isset($masterdirs[$parentpath][$subdir][$checkfile])) {
+                            // Remove the file.
+                            debug_print( "Remove dir $fullpath/$subdir/$checkfile\n");
+                            rmdir("$fullpath/$subdir/$checkfile");
+                        }
+                    }
+                }
+
+                // now look for adds.
+                foreach($masterfiles[$parentpath][$subdir] as $checkfile => $one) {
+                    if(!isset($allfiles[$repo['fullpath']][$subdir][$checkfile])) {
+                        // make the file
+                        debug_print( "touch file $fullpath/$subdir/$checkfile\n");
+                        touch("$fullpath/$subdir/$checkfile");
+                    }
+                }
+                foreach($masterdirs[$parentpath][$subdir] as $checkfile => $one) {
+                    if(!isset($alldirs[$repo['fullpath']][$subdir][$checkfile])) {
+                        // make the file
+                        debug_print( "mkdir $fullpath/$subdir/$checkfile\n");
+                        mkdir("$fullpath/$subdir/$checkfile");
+                    }
+                }
+
+            }
+                    
+        }            
     }
 
 }
 
 function gen_alias_lines($fullpath,$repos,$gconf) {
     $reponame = str_replace('/','-',substr($fullpath,1));
+    // Get each piece of the full path.  Note we drop the first '/' with a substr:
     $pathpieces = explode('/',substr($fullpath,1));
     $ret = '';
     while(($currentpiece = array_pop($pathpieces))) {
@@ -105,7 +233,7 @@ foreach($repos as $repo) {
     if(!is_dir($repodir)) {
         create_repo_dir($repodir);
     }
-
+    
     $accesses = "";
     foreach($repos as $rfp => $repodata) {
         if(substr($rfp,0,strlen($repo['fullpath'])) === $repo['fullpath']) {
@@ -129,7 +257,7 @@ foreach($repos as $repo) {
         $outfile = $tmp;
     }
 
-    file_put_contents($gconf->apache->per_repo_config."/munkirepo-".$reponame.".conf",$outfile);
+    file_put_contents($gconf->apache->per_repo_config."-temp/munkirepo-".$reponame.".conf",$outfile);
 
     $perms = $mtm->get_usergroup_permissions_for_repository($repo['id']);
     $requireWrepos = [];
@@ -203,8 +331,76 @@ foreach($repos as $repo) {
 
     $davconf .= $aliaslines;
 
-    file_put_contents($gconf->apache->per_repo_config."/munkirepo-".$reponame.".dav",$davconf);
+    file_put_contents($gconf->apache->per_repo_config."-temp/munkirepo-".$reponame.".dav",$davconf);
 
     
 }
 
+// This creates 0-lengh files or empty directories which will be redirected by apache but should be there for 'ls'.
+gen_stub_entries($repos,$gconf);
+
+
+// Compare each file generated to detect differences.
+$oldfiles = scandir($gconf->apache->per_repo_config);
+$newfiles = scandir($gconf->apache->per_repo_config."-temp");
+
+$restart = 0;
+foreach($oldfiles as $oldfile) {
+    if(!in_array($oldfile,$newfiles)) {
+        print "old file $oldfile not in newfiles\n";
+        $restart = 1;
+    }
+}
+
+// Don't bother checking if we found a difference
+if($restart == 0) {
+    foreach($newfiles as $newfile) {
+        if(!in_array($newfile,$oldfiles)) {
+            print "new file $newfile not in oldfile\n";
+            $restart = 1;
+        }
+    }
+}
+
+// Don't bother checking if we found a difference.
+if($restart == 0) {
+    foreach($newfiles as $newfile) {
+        if($newfile !== "." && $newfile !== "..") {
+            $diff = shell_exec("diff -q ".$gconf->apache->per_repo_config."/$newfile ".$gconf->apache->per_repo_config."-temp/$newfile");
+            if(isset($diff)) {
+                debug_print("$diff");
+                $restart = 1;
+            }
+        }
+    }
+}
+
+
+if($restart == 1) {
+    $files = scandir($gconf->apache->per_repo_config);
+
+    foreach($files as $file) {
+        if($file !== '.' && $file !== '..') {
+            unlink($gconf->apache->per_repo_config."/".$file);
+        }
+    }
+
+    $newfiles = scandir($gconf->apache->per_repo_config."-temp");
+    foreach($newfiles as $file) {
+        if($file !== '.' && $file !== '..') {
+            rename($gconf->apache->per_repo_config."-temp/".$file,$gconf->apache->per_repo_config."/".$file);
+        }
+    }
+
+    //print "Restart!\n";
+    $res = shell_exec($gconf->apache->restart);
+
+} else {
+    $files = scandir($gconf->apache->per_repo_config."-temp");
+
+    foreach($files as $file) {
+        if($file !== '.' && $file !== '..') {
+            unlink($gconf->apache->per_repo_config."-temp/".$file);
+        }
+    }
+}
