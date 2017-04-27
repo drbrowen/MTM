@@ -1,0 +1,17 @@
+<header>
+  <h1 class="text-center">Computer Management</h1>
+</header>
+
+<div ng-show="lastresults">
+  <h3>Previous Action Results: {{errortext}}</h3>
+  <p>{{resulttext}}</p>
+</div>
+
+<input type="file" file-model="myfile"/>
+<button ng-click="uploadCSV()">Upload</button><br />
+<input type="checkbox" ng-model="add"/>add: Add new entries from CSV<br />
+<input type="checkbox" ng-model="name"/>name: Process names to match CSV<br />
+<input type="checkbox" ng-model="window" />window: (Re)open windows for MTM.Configure to match CSV<br />
+<input type="checkbox" ng-model="rename" />rename: Process force renaming of machine to match CSV<br />
+<input type="checkbox" ng-model="clientid" />clientid: Process Client_Identifier to match CSV<br />
+<input type="checkbox" ng-model="repository" />repository: Move computers to match CSV repository<br />
