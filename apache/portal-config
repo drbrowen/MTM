@@ -4,7 +4,7 @@
         DBDriver mysql
         DBDParams "dbname=munkicert,user=munkiuser,pass=munkipass"
 
-        DocumentRoot /var/www/roots
+        DocumentRoot /var/storage/roots
         <Directory "/">
                 Options FollowSymLinks
                 AllowOverride None
@@ -16,8 +16,8 @@
         </Location>
 
 
-        Alias "/Portal" "/var/www/portal"
-        <Directory "/var/www/portal">
+        Alias "/Portal" "/var/storage/portal"
+        <Directory "/var/storage/portal">
                     Options Indexes FollowSymLinks MultiViews
                    Require all granted              
         </Directory>
@@ -41,7 +41,7 @@
                    AuthName "Munki Portal"
                    Require valid-user
                    AuthBasicProvider file
-                   AuthUserFile /var/www/portalpassword
+                   AuthUserFile /var/storage/portalpassword
         </Location>
 
 # for Shibboleth logins
@@ -55,14 +55,14 @@
         include /etc/apache/conf/munki-conf-per-group/munkirepo-*.conf
 
 # add authentication for this?
-        <Directory "/var/www/roots/ONBOARD">
+        <Directory "/var/storage/roots/ONBOARD">
           <FilesMatch "munkiconfig.*\.pkg$">
             SetHandler application/x-httpd-php
           </FilesMatch>
         </Directory>
 
 # may not need indexes
-        <Directory "/var/www/roots/">
+        <Directory "/var/storage/roots/">
                 Options Indexes FollowSymLinks MultiViews
                 AllowOverride None
                 Require all granted

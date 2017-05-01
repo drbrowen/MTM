@@ -25,6 +25,12 @@ abstract class API
      */
     protected $args = Array();
     /**
+     * This stores content-type information from an endpoint, if there needs
+     * to be an override for the json_encode stage.
+     */
+    protected $contenttype;
+
+    /**
      * Property: file
      * Stores the input of the PUT request
      */
@@ -95,12 +101,23 @@ abstract class API
       return $this->_response("No Endpoint: $this->endpoint", 404);
     }
 
+    public function settype($cttype)
+    {
+        $this->contenttype = $cttype;
+    }
+
     private function _response($data, $status = 200,$headers = []) {
       header("HTTP/1.1 " . $status . " " . $this->_requestStatus($status));
       foreach($headers as $header) {
           header($header);
       }
-      return json_encode($data);
+      if(!isset($this->contenttype)) {
+          return json_encode($data);
+      } else {
+          header("Content-type: ".$this->contenttype);
+          header("Content-Disposition: attachment; filename=\"content.csv\"");
+          return $data;
+      }
     }
 
     private function _cleanInputs($data) {

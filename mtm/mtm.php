@@ -49,7 +49,13 @@ class MTM  {
         $subject = $this->gconf->CA->casubjectbase.'/CN='.$comp->identifier;
         $certs = T_Certificate::search(['subject','status'],[$subject,'V'],['=','=']);
         if(count($certs)!=0) {
-            throw new exception("Certificate for this identifier already exists.");
+            if($comp->status !== "reopened") {
+                throw new exception("Certificate for this identifier already exists.");
+            } else {
+                $comp->status = 'issued';
+                $comp->save();
+                return $comp;
+            }
         }
 
         $cert = new T_Certificate;
@@ -58,6 +64,8 @@ class MTM  {
         $cert->save();
 
         $results = shell_exec("sudo -u makemunki /etc/makemunki/sign_certificate.sh ".$cert->ID);
+        // Hack as sudo isn't working properly on this machine.
+        //$results = shell_exec("/etc/makemunki/sign_certificate.sh ".$cert->ID);
         file_put_contents("/var/storage/phpsessions/mtmout","Received results: ".$results."\n");
 
         $certs = T_Certificate::search('ID',$cert->ID);
@@ -102,7 +110,7 @@ class MTM  {
             $window = $this->gconf->portal->maximum_window;
         }
 
-        $repos = T_Repository::Search('ID',$in['repository_id']);
+        $repos = T_Repository::search('ID',$in['repository_id']);
         if(count($repos)==0) {
             throw new exception('add_computer: repository ID does not exist.');
         }
@@ -164,6 +172,10 @@ class MTM  {
         }
         
         if(isset($in_changes->name)) {
+            $checkit = T_Computer::search(['name','Repository_ID'],[$in_changes->name,$comp->Repository_ID],['=','=']);
+            if(count($checkit)>0) {
+                throw new exception("update_computer: Name already in use");
+            }
             $comp->name = $in_changes->name;
         }
 
@@ -302,7 +314,12 @@ class MTM  {
     }
 
     public function computers_by_subject($in_subject,$in_user = 'root',$in_flags = 0) {
-        $computers = T_Computer::search('subject',$in_subject);
+        $certificates = T_Certificate::search('subject',$in_subject);
+        if(count($certificates)!=1) {
+            throw new exception('Computer certificate does not exist');
+        }
+
+        $computers = T_Computer::search('Certificate_ID',$certificates[0]->ID);
 
         if(count($computers) != 1) {
             throw new exception('Computer does not exist');
@@ -349,30 +366,33 @@ class MTM  {
         return $ret;
     }
 
-    public function get_repositories_editable_for_user($in_user) {
+    public function get_repositories_editable_for_user($in_user,$in_flags = 0) {
         $perms = V_UserPermission::Search('User_name',$in_user);
         $ret = [];
         foreach($perms as $perm) {
             if(ereg('G',$this->_unpack_portal_permission($perm->portal_permission))) {
                 $tmp = [];
-                $ret[] = $this->repository_by_id($perm->Repository_ID);
+                $ret[] = $this->repository_by_id($perm->Repository_ID,$in_flags);
             }
         }
         return $ret;
     }
 
-    public function repository_by_id($in_ID) {
-        $groups = T_Repository::Search('ID',$in_ID);
-        if(count($groups)!=1) {
-            throw new exception("Cannot find a computer group");
+    public function repository_by_id($in_ID,$in_flags = 0) {
+        $repos = T_Repository::Search('ID',$in_ID);
+        if(count($repos)!=1) {
+            throw new exception("Cannot find a computer repo");
         }
-        $group = $groups[0];
+        $repo = $repos[0];
         $ret = [];
-        $ret['id'] = $group->ID;
-        $ret['name'] = $group->name;
-        $ret['fullpath'] = $group->fullpath;
-        $ret['fileprefix'] = $group->fileprefix;
-        $ret['description'] = $group->description;
+        $ret['id'] = $repo->ID;
+        $ret['name'] = $repo->name;
+        $ret['fullpath'] = $repo->fullpath;
+        $ret['fileprefix'] = $repo->fileprefix;
+        $ret['description'] = $repo->description;
+        if($in_flags & MTM::FLAGS_RAW) {
+            $ret['raw'] = $repo;
+        }
         return $ret;
     }
     
@@ -766,14 +786,14 @@ class MTM  {
         $user = $users[0];
 
         $usergroups = T_UserGroup::search('ID',$in_usergroupID);
-        if(count($users)!=1) {
+        if(count($usergroups)!=1) {
             throw new exception("Cannot find group");
         }
         $usergroup = $usergroups[0];
 
         // Search for the user in the group already.
-        $uiugs = T_User_in_UserGroup::search(['User_ID','UserGroup_ID'],[$in_userID,$in_groupID],['=','=']);
-        if(count($uiugs) == 0) {
+        $uiugs = T_User_in_UserGroup::search(['User_ID','UserGroup_ID'],[$in_userID,$in_usergroupID],['=','=']);
+        if(count($uiugs) < 1) {
             $uiug = new T_User_in_UserGroup;
             $uiug->User_ID = $user;
             $uiug->UserGroup_ID = $usergroup;
@@ -1232,7 +1252,7 @@ class MTM  {
         // Make sure it doesn't already exist.
         $groupsearch = T_Repository::search('fullpath',$in_repository['fullpath']);
         if(count($groupsearch)!=0) {
-            throw new exception("add_repository: group already exists.");
+            throw new exception("add_repository: repository already exists.");
         }
         $cg = new T_Repository;
         $cg->name = $groupname;
@@ -1287,6 +1307,239 @@ class MTM  {
         return $add->ID;
     }    
 
+// This generates/uploads CSV files
+
+    public function get_csv_for_repository($repositoryID,$in_user = 'root') {
+        $repos = T_Repository::search('ID',$repositoryID);
+        if(count($repos)!=1) {
+            throw new exception("You do not have permissions for this repository.");
+        }
+        $repo = $repos[0];
+        if($in_user !== 'root' && !$this->check_user_perm_for_repository($in_user,$repo->fullpath,'P','V')) {
+            throw new exception("You do not have permissions for this repository.");
+        }
+
+        $computers = T_Computer::search('Repository_ID',$repo->ID);
+        $output = "Repository,Name,Serial Number,Client Identifier,Rename on Install,Window,Status(ro),Window Start(ro),Window Close(ro)\n";
+
+        foreach($computers as $computer) {
+            $output .= join(',',
+            [$repo->fullpath,
+            $computer->name,
+            $computer->identifier,
+            $computer->forced_clientidentifier,
+            $computer->rename_on_install,
+            0,
+            $computer->status,
+            $computer->window_start_date,
+            $computer->window_close_date])."\n";
+        }
+
+        return $output;
+            
+    }
+
+    private function _combine_array(&$row, $key, $header) {
+        $row = array_combine($header, $row);
+    }
+
+    public function load_csv_for_repository($params,$in_user = 'root') {
+        if(!isset($params['csv'])) {
+            throw new exception("load_csv_for_repository: csv not specified.");
+        }
+
+        $csvin = array_map('str_getcsv', explode(PHP_EOL,$params['csv']));
+
+        $header = array_shift($csvin);
+
+        if(!in_array('Repository',$header)) {
+            throw new exception("load_csv_for_repository: 'Repository' column not found in CSV");
+        }
+        if(!in_array('Serial Number',$header)) {
+            throw new exception("load_csv_for_repository: 'Serial Number' column not found in CSV");
+        }
+
+        array_walk($csvin, array($this,'_combine_array'), $header);
+
+        // Make a hash of all repos we see, so we can quickly get repo objects.
+        $editable_repos = $this->get_repositories_editable_for_user($in_user,MTM::FLAGS_RAW);
+        $seen_repos = [];
+        $repos_by_id = [];
+        foreach($editable_repos as $erepo) {
+            $seen_repos[$erepo['fullpath']] = $erepo;
+            $repos_by_id[$erepo['id']] = $erepo;
+        }
+
+        $add_comps = [];
+        $mod_comps = [];
+
+        // Decide if each computer is an add or is a modify.
+        foreach($csvin as $row) {
+            if($row == false) {
+                continue;
+            }
+            $computers = T_Computer::search('identifier',$row['Serial Number']);
+            if(count($computers)==0) {
+                if($in_user !== 'root' && !isset($seen_repos[$row['Repository']])) {
+                    throw new exception("You don't have permissions in this repository: '".$row['Repository']."'");
+                }
+                $add_comps[] = $row;
+            } else {
+                // Check if we have permissions.
+                $comp = $computers[0];
+                if(!isset($repos_by_id[$comp->Repository_ID])) {
+                    throw new exception("You don't have permissions in the repository for computer with Serial Number '".$row['Serial Number']."'");
+
+                }
+                if(isset($params['repository']) && $params['repository']==1 && !isset($seen_repos[$row['Repository']])) {
+                    throw new exception("You don't have permissions in the repository for computer with Serial Number '".$row['Serial Number']."'");
+                }
+
+                $tmp = [];
+                $tmp['csv'] = $row;
+                $tmp['computer'] = $comp;
+                $mod_comps[] = $tmp;
+            }
+
+        }
+
+
+        // Do 2 passes.  First we see if we _can_ change. Then we try the changes.  This way
+        // we usually won't stop mid-csv.
+
+        // Check what options we can change. Valid values are
+        // add=1 for add new entries (all others are ignored for an add)
+        // name=1 for changing name
+        // window=1 for reopening a window (window must be > 0)
+        // rename=1 for setting rename_on_install
+        // clientid=1 for forcing a client_identifier
+        // repository=1 for changing repositories.
+        // Note that the key is _always_ the identifier and cannot be changed.
+
+        // Check for adds
+        if(isset($params['add']) && $params['add'] == 1) {
+            if(!in_array('Name',$header) ||
+            !in_array('Window',$header) ||
+            !in_array('Client Identifier',$header) ||
+            !in_array('Rename on Install',$header)) {
+                throw new exception("load_csv_for_repository: For adds, CSV MUST have columns: 'Repository','Name','Serial Number','Window','Client Identifier','Rename on Install'");
+            }
+
+            foreach($add_comps as $addit) {
+                if(!isset($addit['Serial Number'])) {
+                    continue;
+                }
+                if(!(is_numeric($addit['Window'])) || $addit['Window']<1) {
+                    throw new exception("load_csv_for_repository: Window '".$addit['Window']."' is not numeric for '".$addit['Serial Number']."'");
+                }
+                $checknames = T_Computer::Search(['name','Repository_ID'],[$addit['Name'],$seen_repos[$addit['Repository']]->ID],['=','=']);
+                if(count($checknames)!=0) {
+                    throw new exception("load_csv_for_repository: Name '".$addit['Name']."' already in use in repository.");
+                }
+                if($addit['Rename on Install'] !== '0' &&
+                $addit['Rename on Install'] !== '' &&
+                $addit['Rename on Install'] !== '1') {
+                    throw new exception("load_csv_for_repository: Rename on Install must be '0' (or blank) or '1' for '".$addit['Serial Number']."'");
+                }
+            }
+        }
+        $do_name = 0;
+        if(isset($params['name']) && $params['name'] == 1) {
+            if(!in_array('Name',$header)) {
+                throw new exception("load_csv_for_repository: Can't modify computer name without 'Name' column");
+            }
+            $do_name = 1;
+        }
+            
+        $do_window = 0;
+        if(isset($params['window']) && $params['window'] == 1) {
+            if(!in_array('Window',$header)) {
+                throw new exception("load_csv_for_repository: Can't modify window without 'Window' column");
+            }
+            $do_window = 1;
+        }
+            
+        $do_rename = 0;
+        if(isset($params['rename']) && $params['rename'] == 1) {
+            if(!in_array('Rename on Install',$header)) {
+                throw new exception("load_csv_for_repository: Can't modify rename on install without 'Rename on Install' column");
+            }
+            $do_rename = 1;
+        }
+
+        $do_clientid = 0;
+        if(isset($params['clientid']) && $params['clientid'] == 1) {
+            if(!in_array('Client Identifier',$header)) {
+                throw new exception("load_csv_for_repository: Can't modify client identifier without 'Client Identifier' column");
+            }
+            $do_clientid = 1;
+        }
+
+        $do_repository = 0;
+        if(isset($params['repository']) && $params['repository'] == 1) {
+            $do_repository = 1;
+        }
+
+
+        //***********
+        // Done with all the checks, now let's process the adds.
+        //***********
+        
+        foreach($add_comps as $addit) {
+            $args = [];
+            $args['name'] = $addit['Name'];
+            $args['repository_id'] = $seen_repos[$addit['Repository']]['raw']->ID;
+            $args['identifier'] = $addit['Serial Number'];
+            $args['window'] = $addit['Window'];
+            if($addit['Client Identifier']!=='') {
+                $args['forced_clientidentifier'] = $addit['Client Identifier'];
+            }
+            if($addit['Rename on Install'] !=='') {
+                $args['rename_on_install'] = $addit['Rename on Install'];
+            }
+            ob_start();
+            var_dump($args);
+            $debug = ob_get_clean();
+            file_put_contents("/var/storage/phpsessions/additargs",$debug);
+            $this->add_computer($args,$in_user);
+        }
+
+        foreach($mod_comps as $modit) {
+            $needsave = 0;
+            if($do_name == 1 && $modit['csv']['Name'] !== $modit['computer']->name) {
+                $modit['computer']->name = $modit['csv']['Name'];
+                $needsave = 1;
+            }                
+
+            if($do_window == 1 && $modit['csv']['Window']>0) {
+                // We can skip permissions, as we've already checked.
+                $this->readd_computer($modit['computer']->ID,'root',$modit['csv']['Window']);
+            }
+
+            if($do_rename == 1 && $modit['csv']['Rename on Install'] != $modit['computer']->rename_on_install) {
+                $modit['computer']->rename_on_install = $modit['csv']['Rename on Install'];
+                $needsave = 1;
+            }
+
+            if($do_clientid == 1 && $modit['csv']['Client Identifier'] != $modit['computer']->forced_clientidentifier) {
+                $modit['computer']->forced_clientidentifier = $modit['csv']['Client Identifier'];
+                $needsave = 1;
+            }            
+
+            if($do_repository == 1 && $seen_repos[$modit['csv']['Repository']]['raw']->ID != $modit['computer']->Repository_ID) {
+                $modit['computer']->Repository_ID = $seen_repos[$modit['csv']['Repository']]['raw'];
+                $needsave = 1;
+            }            
+
+            if($needsave != 0) {
+                $modit['computer']->save();
+            }
+
+        }
+
+
+        return 0;
+    }
 
 // Just separating slightly different types of thingies here.
     

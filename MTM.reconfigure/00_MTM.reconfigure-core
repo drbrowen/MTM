@@ -1,0 +1,40 @@
+#!/usr/bin/python
+
+import sys
+import subprocess
+
+import re
+sys.path.append('/usr/local/munki/munkilib')
+
+import fetch
+import munkicommon
+import keychain
+
+keychain_obj = keychain.MunkiKeychain()
+
+fullURL = munkicommon.pref('SoftwareRepoURL') + '/MTM.reconfigure/get_info.php'
+
+fetch.getResourceIfChangedAtomically(fullURL,'/Library/Managed Installs/onboardinfo')
+
+f = open('/Library/Managed Installs/onboardinfo')
+
+params = {}
+for line in f:
+      paramsraw = re.search('(^[^:]*):\s(.*)',line)
+      if paramsraw is not None :
+        params[paramsraw.group(1)] = paramsraw.group(2)
+
+f.close()
+
+if params['rename'] == '1':
+      compname = subprocess.check_output(['scutil','--get','ComputerName']).strip('\n')
+      lhostname = subprocess.check_output(['scutil','--get','LocalHostName']).strip('\n')
+      if compname != params['name']:
+            res = subprocess.check_output(['scutil','--set','ComputerName',params['name']])
+      if lhostname != params['name']:
+            res = subprocess.check_output(['scutil','--set','LocalHostName',params['name']])
+
+
+if munkicommon.pref('ClientIdentifier') != params['clientidentifier']:
+      subprocess.check_output(['defaults','write','/Library/Preferences/ManagedInstalls.plist','ClientIdentifier',params['clientidentifier']])
+

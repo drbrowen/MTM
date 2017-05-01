@@ -32,7 +32,7 @@ class MunkiPackage {
 <dict>
   <key>SuccessfulInstall</key>
   <true/>
-  <key>AppleSoftwareUpdateOnly</key>
+  <key>AppleSoftwareUpdatesOnly</key>
   <false/>
   <key>InstallAppleSoftwareUpdates</key>
   <true/>
@@ -54,14 +54,14 @@ class MunkiPackage {
   <string>';
             
         $URLpath = str_replace('/','-',substr($repo->fullpath,1));
-        $URL = $this->gconf->main->baseurl.'/'.$URLpath;
+        $URL = $this->gconf->main->baseurl.$URLpath;
 
-        $plistout .= $URL."<string>\n";
+        $plistout .= $URL."</string>\n";
         $fci = $comp->forced_clientidentifier;
         if(isset($fci) && $fci !== '') {
             $plistout .= "  <key>ClientIdentifier</key>\n  <string>".$fci."</string>\n";
         }
-        $plistout .= "</dict>\n</string>\n";
+        $plistout .= "</dict>\n</plist>\n";
 
         return $plistout;
         
@@ -116,7 +116,7 @@ class MunkiPackage {
         file_put_contents($keyfile,$certificate->privatekey);
         chmod($keyfile,0600);
         $certfile = $tmpname.".d"."/Contents/Library/Managed Installs/ssl/munki.pem";
-        file_put_contents($keyfile,$certificate->certificate);
+        file_put_contents($certfile,$certificate->certificate);
 
         // These commands are systemy difficult-to-implement in php, so
         // shell out to do the actual packaging.

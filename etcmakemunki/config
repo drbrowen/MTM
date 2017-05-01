@@ -25,6 +25,7 @@ dbname = munkicert
 dbhost = localhost
 dbuser = munkiuser
 dbpass = munkipass
+backupdir = /var/storage/backupdir
 
 [portal]
 session_lifetime = 86400

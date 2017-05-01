@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Check that we don't run in circles.
+ABSOLUTE_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
+DIRNAME=`dirname "$ABSOLUTE_PATH"`
+if [ "$DIRNAME" = "/usr/local/munki/preflight.d" ]; then
+    echo "Skipping recursive run."
+    exit 0
+fi
+
+# Change to where the scripts are
+if [ -d /usr/local/munki/preflight.d ]; then
+    cd /usr/local/munki/preflight.d
+fi
+
+# Make sure we are where the scripts are.
+if [ `pwd` != "/usr/local/munki/preflight.d" ]; then
+    echo "Can't change to preflight.d"
+    exit 1
+fi
+
+for FILE in *;do
+    if [ -x $FILE ]; then
+        ./$FILE
+    fi
+done

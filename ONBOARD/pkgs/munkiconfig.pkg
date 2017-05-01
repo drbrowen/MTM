@@ -16,7 +16,7 @@ if(!isset($_GET['ident'])) {
 
 
 $ident =  trim(base64_decode($_GET['ident']));
-//$ident = "ABCDEFGHIJKL";
+//$ident = "0123456789AB=C";
 
 if($ident === "") {
     $mtm->send_404_page("No computer ident sent");
@@ -33,6 +33,7 @@ catch(exception $e) {
 }
 
 if(array_key_exists('error',$clientpkg)) {
+    print "Got an error\n";
     $mtm->send_404_page($clientpkg['error']);
     exit(0);
 }

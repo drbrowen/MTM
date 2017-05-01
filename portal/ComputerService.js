@@ -12,8 +12,6 @@ ComputerService.factory("myErrorHandler",function($window) {
 	if(angular.isDefined(data.status) && angular.isDefined(data.status.error) && data.status.error == 2) {
 	    var landingURL = "https://" + $window.location.host +
 		"/Portal/api/v1/login/";
-	    console.log(landingURL);
-	    console.log($window.location);
 	    $window.open(landingURL,"_blank");
 	}
 		      
@@ -36,8 +34,12 @@ ComputerService.factory("Computer",function($resource,myErrorHandler) {
 		       url: "/api/v1/users/repositories",
 		       isArray:true,
 		       transformResponse: function(data) {return myErrorHandler.format(data)},
-		       interceptor: {responseError: myErrorHandler.doit}}
-
+		       interceptor: {responseError: myErrorHandler.doit}},
+	'csv': {method:'POST',
+		url: "/api/v1/computers/csv",
+		isArray:false,
+		transformResponse: function(data) {return myErrorHandler.format(data)},
+	       interceptor: {responseError: myErrorHandler.doit}},
     });
 
     Comp.setlastresults = function(current_results) {
@@ -84,7 +86,7 @@ app.filter('range', function() {
     }
 });
 
-app.controller("ComputerController",function($scope,$routeParams,Computer,$location) {
+app.controller("ComputerController",function($scope,$routeParams,Computer,$location,$window) {
     var editindex = 0;
 
     $scope.itemsperpage = 10;
@@ -130,11 +132,11 @@ app.controller("ComputerController",function($scope,$routeParams,Computer,$locat
     $scope.computersearch = function() {
 	Computer.setlastresults([]);
 	$location.url('/computers/search/repo/' + $scope.form_repo.id);
-    };
+    }
     
     $scope.setedit = function($activeID) {
 	$location.url('/computers/edit/id/' + $activeID);
-    };
+    }
 
     $scope.processdata = function(data) {
 	if(data.length < 1) {
@@ -146,13 +148,19 @@ app.controller("ComputerController",function($scope,$routeParams,Computer,$locat
 	    $scope.computers = data;
 	    $scope.displaycomputers = [] . concat($scope.computers);
 	}
-    };
+    }
 
     $scope.goadd = function() {
     	Computer.setlastresults({});
     	$location.url('/computers/edit/new/' + $scope.form_repo.id);
-    };
+    }
 
+    $scope.getcsv = function() {
+	var landingURL = "https://" + $window.location.host +
+	    "/Portal/api/v1/computers/csv/" + $scope.form_repo.id;
+	$window.open(landingURL,"_self");
+
+    }
 });
 
 app.controller("ComputerEditController",function($scope,$location,$routeParams,Computer) {
@@ -277,6 +285,71 @@ app.controller("ComputerEditController",function($scope,$location,$routeParams,C
 	}
 	$scope.showadd = 0;
 	$scope.showedit = 1;
+    }
+    
+});
+
+app.directive('fileModel', ['$parse', function ($parse) {
+    return {
+        restrict: 'A',
+        link: function(scope, element, attrs) {
+            var model = $parse(attrs.fileModel);
+            var modelSetter = model.assign;
+            
+            element.bind('change', function(){
+                scope.$apply(function(){
+                    modelSetter(scope, element[0].files[0]);
+                });
+            });
+        }
+    };
+}]);
+
+app.controller("ComputerCSVController",function($scope,$location,Computer) {
+    $scope.uploadCSV = function() {
+	var reader = new FileReader();
+	reader.onload = function() {
+	    $scope.submit(reader.result);
+	}
+	reader.readAsText($scope.myfile);
+    }
+
+    var checklastresults = function() {
+	var theresults = Computer.getlastresults();
+	if(angular.isDefined(theresults.status)) {
+	    $scope.lastresults = 1;
+	    if(theresults['status']['error'] == 1){
+		$scope.errortext = 'ERROR';
+	    } else {
+		$scope.errortext = 'OK';
+	    }
+	    $scope.resulttext = theresults['status']['text'];
+	} else {
+	    $scope.lastresults = 0;
+	}
+    }
+
+    checklastresults();
+
+    $scope.submit = function(csv) {
+	var add = ($scope.add?1:0);
+	var name = ($scope.name?1:0);
+	var window = ($scope.window?1:0);
+	var rename = ($scope.rename?1:0);
+	var clientid = ($scope.clientid?1:0);
+	var repo = ($scope.repository?1:0);
+	Computer.csv({csv:csv,
+		      add:add,
+		      name:name,
+		      window:window,
+		      rename:rename,
+		      clientid:clientid,
+		      repository:repo},function(data) {
+			  if(angular.isDefined(data.status)) {
+			      Computer.setlastresults(data);
+			      checklastresults();
+			  }
+		      });
     }
     
 });

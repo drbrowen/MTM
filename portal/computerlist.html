@@ -22,6 +22,7 @@
   <p>{{resulttext}}</p>
 </div>
 
+
 <!--<h3>Search for computers</h3>-->
 <div class="well">
 <form class="form-inline">
@@ -30,6 +31,7 @@
         <select class="form-control" ng-model="form_repo" ng-options="repo as repo.fullpath for repo in repos track by repo.id"></select>
         <button type="submit" class="btn btn-primary" ng-click="computersearch()" value="Limit List">Select Repository</button>
         <button type="submit" class="btn btn-primary" ng-click="goadd()" value="Add New">Add New Computer to Selected repository</button>
+        <button type="submit" class="btn btn-primary" ng-click="getcsv()" ng-href="{{ url }}" value="Download as CSV">Download as CSV</button>
     </div>
 </form>
 </div>

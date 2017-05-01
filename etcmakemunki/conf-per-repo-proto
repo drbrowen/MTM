@@ -14,7 +14,11 @@
   AuthBasicProvider dbd
   AuthBasicAuthoritative On
   AuthDBDUserPWQuery "SELECT 'xxj31ZMTZzkVA'"
-  require dbd-group %%FULLPATH%%
+%%ACCESSES%%
   AuthZDBDQuery "SELECT fullpath FROM Repository,Computer,Certificate WHERE Computer.Certificate_ID = Certificate.ID AND Repository.ID = Computer.Repository_ID and subject = %s"
 </Directory>
 
+%%REWRITERULES%%
+RewriteRule ^/%%REPONAME%%/MTM.reconfigure(.*) %%RECONFIGPATH%%$1
+RewriteRule ^/%%REPONAME%%/(.*) %%REPOBASEPATH%%%%FULLPATH%%/$1
+RewriteRule ^/%%REPONAME%% %%REPOBASEPATH%%%%FULLPATH%%
