@@ -1,4 +1,39 @@
-.mylink { margin-left: 20px; }
-.explain { margin-left: 30px; }
+/*.mylink { margin-left: 20px; }
+.explain { margin-left: 30px; }*/
 .banner { background-color: #0E608D; padding: 20px 30px; }
 
+/* STICKY FOOTER */
+html,body {height: 100%;}
+#wrap {min-height: 100%;height: auto !important;height: 100%;margin: 0 auto -75px;}
+#push,#footer {height: 75px;}
+/* END STICKY FOOTER */
+
+/* DEFAULT CUSTOM STRUCTURES */
+table.table-default{font-size:12px;}
+/* END DEFAULT CUSTOM STRUCTURES */
+
+.app-section-link {margin: 15px 0 3px 0;color: #4f4f4f;font-weight: bold;font-size: 14px;text-transform: uppercase;}
+.app-section-lead {border-bottom: 4px solid #d5d0c9;color: #1f2c33;margin-bottom: 20px;font-weight: bold;}
+.app-margbot10 {margin-bottom:10px;}
+.app-margbot20 {margin-bottom:20px;}
+.app-margtop10 {margin-top:10px;}
+.app-margtop20 {margin-top:20px;}
+.app-form-table input {margin-right:5px;}
+
+/* PAGE STRUCTURE */
+#wrap > .container {margin-bottom:20px;}
+#app-content {padding: 0 10px 0;}
+#app-content.hidden-phone {padding: 0;}
+#footer {margin-left: -20px;margin-right: -20px;padding-left: 20px;padding-right: 20px;background-color:#F5F5F5;}
+#footer p {color:#707070;margin-bottom:0;font-size:11px;line-height:16px;}
+#footer a {color:#5C707C;}
+#footer .row {padding:20px 0 0 0;}
+/* END PAGE STRUCTURE */
+
+/* BOOTSTRAP OVERRIDES */
+h1 {font-size:22px;margin-top:10px;margin-bottom:2px;}
+h2 {font-size:18px;margin-bottom:2px;color:#4F4F4F;}
+h3 {font-size:16px;margin-bottom:2px;color:#4F4F4F;}
+.breadcrumb {margin-bottom:5px;background-color:#FFF;padding:8px 0;}
+.pagination {margin:0;}
+.help-block {font-size:12px;margin:2px 0 0 0;}

@@ -1,28 +1,59 @@
 <!DOCTYPE html>
 <html ng-app="myApp">
 
-<head>
-   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.28/angular.js">
-   </script>
-   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.28/angular-resource.js">
-   </script>
-   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.28/angular-route.js">
-   </script>
-   <script src="components/dirPagination.js"></script>
-   <script src="components/smart-table.min.js"></script>
-   <script src="app.js"></script>
-   <script src="ComputerService.js"></script>
-   <script src="GroupService.js"></script>
-   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css"/>
-   <link rel="stylesheet" href="mainstyle.css"/>
-   <meta charset="utf-8">
-   <title>Munki Computer Certificate Portal</title>
-</head>
-<body>
-<div class="banner"><img alt="University of Illinois" src="uillinois-wordmark-large.png"/></div>
-<a href="/Portal/#/">Home</a>
-<div ng-view></div>
-</body>
+    <head>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.28/angular.js">
+        </script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.28/angular-resource.js">
+        </script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.28/angular-route.js">
+        </script>
+        <script src="components/dirPagination.js"></script>
+        <script src="components/smart-table.min.js"></script>
+        <script src="app.js"></script>
+        <script src="ComputerService.js"></script>
+        <script src="GroupService.js"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css"/>
+        <link rel="stylesheet" href="mainstyle.css"/>
+        <meta charset="utf-8">
+        <title>Munki Computer Certificate Portal</title>
+    </head>
+    <body>
+        <div id="wrap">
+            <div class="banner" role="banner">
+                <img alt="University of Illinois" src="uillinois-wordmark-large.png"/>
+            </div>
+            <div class="container">
+                <div id="app-content" role="main">
+                    <!--<a href="/Portal/#/">Home</a>-->
+                    <div ng-view></div>
+                </div>
+            </div>
+            <div id="push"></div>
+        </div> <!-- End WRAP -->
+        <div id="footer" role="contentinfo">
+            <div class="container">
+                <div class="row">
+<!--                    <div class="col-sm-1">
+                        <a target="_blank" href="http://illinois.edu" class="pull-right">
+                            <img alt="Illinois logo" src="" />
+                        </a>
+                    </div>-->
+                    <div class="col-sm-12">
+                        <p>
+                            Site developed by: <strong>
+                                <a target="_blank" href="https://ischool.illinois.edu/">The iSchool at Illinois</a>
+                            </strong>  |  
+                            <a target="_blank" href="http://illinois.edu/">UNIVERSITY OF ILLINOIS AT URBANA-CHAMPAIGN</a>
+                        </p>
+                        <p> 
+                            Need Help? <a href="#">Munki Portal Questions</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
 
 </html>
 

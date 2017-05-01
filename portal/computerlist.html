@@ -1,25 +1,59 @@
-<header>
-  <h1 class="text-center">Computer Management</h1>
-</header>
+<div class="row">
+    <div class="col-xs-8">
+        <ol class="breadcrumb">
+            <li><a href="/Portal" title="home"><span class="glyphicon glyphicon-home" aria-hidden="true"></span></a></li>
+            <li class="active">Computer Management</li>
+        </ol>
+    </div>
+    <div class="col-xs-4" style="padding-top:3px;">
+        <div class="pull-right">
+            <a href="/Shibboleth.sso/Logout"><strong>LOG OUT</strong></a>
+        </div>
+    </div>
+</div>
+
+<!--<header>-->
+<div class="app-section-lead">
+  <h1>Computer Management</h1>
+</div>
 
 <div ng-show="lastresults">
   <h3>Previous Action Results: {{errortext}}</h3>
   <p>{{resulttext}}</p>
 </div>
 
-<h3>Search for computers</h3>
-  Limit to Repository: <select ng-model="form_repo" ng-options="repo as repo.fullpath for repo in repos track by repo.id"></select>
-  <input type="submit" ng-click="computersearch()" value="Limit List"/>
-  <input type="submit" ng-click="goadd()" value="Add New" />
+<!--<h3>Search for computers</h3>-->
+<div class="well">
+<form class="form-inline">
+    <div class="form-group">
+        <label>Repository</label><br/>
+        <select class="form-control" ng-model="form_repo" ng-options="repo as repo.fullpath for repo in repos track by repo.id"></select>
+        <button type="submit" class="btn btn-primary" ng-click="computersearch()" value="Limit List">Select Repository</button>
+        <button type="submit" class="btn btn-primary" ng-click="goadd()" value="Add New">Add New Computer to Selected repository</button>
+    </div>
 </form>
+</div>
 
 <div ng-show="goodresults">
-  <div>
-    <h3>Computers</h3>
-    <input type="text" class="form-control" placeholder="name or serial" ng-model="searchName" />Items per page:<input type="radio" ng-model="itemsperpage" ng-value="10" />10<input type="radio" ng-model="itemsperpage" ng-value="25"/>25
+  <!--<div>-->
+    <!--<h3>Computers</h3>-->
+    <div class="app-section-lead" style="margin-bottom:3px;">
+        <h2>Computers</h2>
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <input type="text" class="form-control" placeholder="Filter Table on 'Name' or 'Serial Number'" ng-model="searchName" />
+        </div>
+        <!--
+        <div class="col-md-8 pull-right">
+            Results per Page: <input type="radio" ng-model="itemsperpage" ng-value="10" />10<input type="radio" ng-model="itemsperpage" ng-value="25"/>25
+        </div>
+        -->
+    </div>
+    <div class="table-responsive">
     <table st-table="displaycomputers"
 	   st-safe-src="computers"
-	   class="table table-striped table-hover">
+	   class="table table-striped table-hover table-default">
       <thead>
 	<th st-sort="repository" st-skip-natural="true">Repository</th>
 	<th st-sort="name" st-skip-natural="true">Name</th>
@@ -49,8 +83,19 @@
 	</tr>
       </tbody>
     </table>
-    <dir-pagination-controls boundary-links="true" template-url="components/dirPagination.tpl.html"></dir-pagination-controls>
-  </div>
+    <div class="row">
+        <div class="col-md-4">
+            <b>Results per Page:</b><br/> 
+            <input type="radio" ng-model="itemsperpage" ng-value="10" /> 10 <input type="radio" ng-model="itemsperpage" ng-value="25"/> 25
+        </div>
+        <div class="col-md-8">
+            <div class="pull-right">
+                <dir-pagination-controls boundary-links="true" template-url="components/dirPagination.tpl.html"></dir-pagination-controls>
+            </div>
+        </div>
+    </div>
+    </div>    
+  <!--</div>-->
 </div>
 </body>
 </html>

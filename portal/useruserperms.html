@@ -1,48 +1,57 @@
-<header>
-  <h1 class="text-center">Permission Management</h1>
-</header>
+<div class="app-section-lead app-margtop20">
+    <h1>Permission Management</h1>
+</div>
 
 <div ng-show="lastresults">
-  <h3>Previous Action Results: {{errortext}}</h3>
-  <p>{{resulttext}}</p>
+    <h3>Previous Action Results: {{errortext}}</h3>
+    <p>{{resulttext}}</p>
 </div>
 
 <div ng-show="goodresults">
-  <h3>Target User Group</h3>
-  <div class="container">
+    <!--<h3>Target User Group</h3>-->
     <div class="row">
-      <div class="col-xs-6 col-md-3" align="right">Target User Group Name</div>
-      <div class="col-xs-6 col-md-3"><a ng-click="gotargetgroup()">{{perms.target_usergroup_name}}</a></div>
+        <div class="col-xs-4">Target User Group Name</div>
+        <div class="col-xs-8"><a ng-click="gotargetgroup()">{{perms.target_usergroup_name}}</a></div>
     </div>
-  </div>
 
-  <h3>Acting User Group</h3>
-  <div class="container">
+    <!--<h3>Acting User Group</h3>-->
     <div class="row">
-      <div class="col-xs-6 col-md-3" align="right">Acting User Group Name</div>
-      <div class="col-xs-6 col-md-3"><a ng-click="gousergroup()">{{perms.acting_usergroup_name}}</a></div>
+        <div class="col-xs-4">Acting User Group Name</div>
+        <div class="col-xs-8"><a ng-click="gousergroup()">{{perms.acting_usergroup_name}}</a></div>
     </div>
-  </div>
 
-  <form  class="simple-form">
-    
-  <h3>Permissions:</h3>
-  <div class="container">
-    <div class="row">
-      <div class="col-xs-4 col-md-2" align="right">Portal Permission</div>
-      <div class="col-xs-2 col-md-2"><input type="checkbox" ng-model="portalpermbit_R"/>Read</div>
-      <div class="col-xs-2 col-md-2"><input type="checkbox" ng-model="portalpermbit_W"/>Write</div>
-      <div class="col-xs-2 col-md-2"><input type="checkbox" ng-model="portalpermbit_D"/>Delete</div>
+    <div class="app-section-lead" style="margin-bottom:3px;">
+        <h2>Edit Permissions</h2>
     </div>
-  </div>
+    <form  class="simple-form">
 
-  <input type="submit" ng-click="edit_save()" value="Save"/>
-  <div ng-show="showback"><input type="submit" ng-click="goback()" value="Cancel"/></div>
-  <!--<input type="submit" ng-click="edit_cancel()" value="Cancel"/>-->
-  
-  </form>
+        <div class="checkbox app-margbot20">
+            <div class="row">
+                <div class="col-sm-4">
+                    <strong>Portal Permission: </strong>
+                </div>
+                <div class="col-sm-8">
+                    <label class="checkbox-inline">
+                        <input type="checkbox" ng-model="portalpermbit_R">Read</input>
+                    </label>
+                    <label class="checkbox-inline">
+                        <input type="checkbox" ng-model="portalpermbit_W">Write</input>
+                    </label>
+                    <label class="checkbox-inline">
+                        <input type="checkbox" ng-model="portalpermbit_D">Delete</input>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <input class="btn btn-primary" type="submit" ng-click="edit_save()" value="Save"/>
+        <span ng-show="showback">
+            <input class="btn btn-default" type="submit" ng-click="goback()" value="Cancel"/>
+        </span>
+        <!--<input type="submit" ng-click="edit_cancel()" value="Cancel"/>-->
+
+    </form>
 
 </div>
 
-</body>
-</html>
+
