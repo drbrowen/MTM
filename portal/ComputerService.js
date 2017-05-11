@@ -12,7 +12,7 @@ ComputerService.factory("myErrorHandler",function($window) {
 	if(angular.isDefined(data.status) && angular.isDefined(data.status.error) && data.status.error == 2) {
 	    var landingURL = "https://" + $window.location.host +
 		"/Portal/api/v1/login/";
-	    $window.open(landingURL,"_blank");
+	    $window.open(landingURL,"_self");
 	}
 		      
 	return data;
