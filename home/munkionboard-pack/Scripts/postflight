@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# First get the config .plist set up.
+if [ -f /Library/Managed\ Installs/initial-config/ManagedInstalls.plist ]; then
+    GOODONE=`defaults read /Library/Managed\ Installs/initial-config/ManagedInstalls.plist SuccessfulInstall`
+    if [ "$GOODONE" = "1" ]; then
+        defaults delete /Library/Managed\ Installs/initial-config/ManagedInstalls.plist SuccessfulInstall
+        defaults delete /Library/Preferences/ManagedInstalls.plist
+        defaults import /Library/Preferences/ManagedInstalls.plist /Library/Managed\ Installs/initial-config/ManagedInstalls.plist
+        rm -f /Library/Managed\ Installs/initial-config/ManagedInstalls.plist
+    fi
+fi    
