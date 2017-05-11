@@ -266,17 +266,19 @@ foreach($repos as $repo) {
         if(ereg('W',$perm['repository_permission'])) {
             $shibgroups = $sha->get_shibgroups_for_usergroup($perm['usergroup_id']);
             foreach($shibgroups as $shibgroup) {
-                $requireWgroups[] = $shibgroup['ad_path'];
+                $requireWrepos[] = $shibgroup['ad_path'];
             }
-        } elseif(ereg('R',$perm['repository_permission'])) {
+        } 
+        if(ereg('R',$perm['repository_permission'])) {
             $shibgroups = $sha->get_shibgroups_for_usergroup($perm['usergroup_id']);
             foreach($shibgroups as $shibgroup) {
                 $requireRrepos[] = $shibgroup['ad_path'];
             }
         }
     }
+
     $davconf = "";
-    $davconf .= "<Directory \"".$gconf->main->fullrepopath.$reponame."\">\n";
+    $davconf .= "<Directory \"".$gconf->main->fullrepopath.'/'.$reponame."\">\n";
     $davconf .= "  <LimitExcept PROPFIND GET OPTIONS>\n";
     // Only write individual requirements if we have at least 1 write group
     if(count($requireWrepos)>0) {
