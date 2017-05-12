@@ -171,7 +171,7 @@ class MTM  {
             $comp->Repository_ID = $newgrp[0];
         }
         
-        if(isset($in_changes->name)) {
+        if(isset($in_changes->name) && $in_changes->name !== $comp->name) {
             $checkit = T_Computer::search(['name','Repository_ID'],[$in_changes->name,$comp->Repository_ID],['=','=']);
             if(count($checkit)>0) {
                 throw new exception("update_computer: Name already in use");
@@ -207,7 +207,7 @@ class MTM  {
         if(is_numeric($in_window)) {
             $window =(int)$in_window;
         } else {
-            throw new exception('add_computer: in_window must be the number of minutes to leave the window open');
+            throw new exception('readd_computer: in_window must be the number of minutes to leave the window open');
         }
 
         if($window > $this->gconf->portal->maximum_window) {

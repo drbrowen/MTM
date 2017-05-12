@@ -146,7 +146,7 @@ class MyAPI extends API
                             return ['status'=>['error'=>1,'text'=>'Computer not found']];
                         }
                         $comp = $computers[0]['raw'];
-                        if(isset($invars->window)) {
+                        if(isset($invars->window) && is_numeric($invars->window)) {
                             $mtm->readd_computer($invars->ID,
                             $_SESSION['user'],
                             $invars->window);
