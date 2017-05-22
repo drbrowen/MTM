@@ -1,17 +1,59 @@
-<header>
-  <h1 class="text-center">Computer Management</h1>
-</header>
+<div class="row">
+    <div class="col-xs-8">
+        <ol class="breadcrumb">
+            <li><a href="/Portal" title="home"><span class="glyphicon glyphicon-home" aria-hidden="true"></span></a></li>
+            <li><a href="/Portal/#/computers/search">Computer Management</a></li>
+            <li class="active">Upload CSV</li>
+        </ol>
+    </div>
+    <div class="col-xs-4" style="padding-top:3px;">
+        <div class="pull-right">
+            <a href="/Shibboleth.sso/Logout"><strong>LOG OUT</strong></a>
+        </div>
+    </div>
+</div>
+
+<div class="app-section-lead">
+  <h1>Upload CSV</h1>
+</div>
 
 <div ng-show="lastresults">
   <h3>Previous Action Results: {{errortext}}</h3>
   <p>{{resulttext}}</p>
 </div>
 
-<input type="file" file-model="myfile"/>
-<button ng-click="uploadCSV()">Upload</button><br />
-<input type="checkbox" ng-model="add"/>add: Add new entries from CSV<br />
-<input type="checkbox" ng-model="name"/>Name: Process names to match CSV<br />
-<input type="checkbox" ng-model="window" />Window: (Re)open windows for MTM.Configure to match CSV<br />
-<input type="checkbox" ng-model="rename" />Rename on Install: Process force renaming of machine to match CSV<br />
-<input type="checkbox" ng-model="clientid" />Client Identifier: Process Client_Identifier to match CSV<br />
-<input type="checkbox" ng-model="repository" />Repository: Move computers to match CSV repository<br />
+<div class="well">
+    <input type="file" file-model="myfile" style="display:inline-block;"/>
+    <button class="btn-xs btn-primary pull-right" ng-click="uploadCSV()">Upload</button>
+</div>
+
+<div class="checkbox">
+    <label>
+        <input type="checkbox" ng-model="add"/> Add: Add new entries from CSV
+    </label>
+</div>
+<div class="checkbox">
+    <label>
+        <input type="checkbox" ng-model="name"/> Name: Process names to match CSV
+    </label>
+</div>
+<div class="checkbox">
+    <label>
+        <input type="checkbox" ng-model="window" /> Window: (Re)open windows for MTM.Configure to match CSV
+    </label>
+</div>
+<div class="checkbox">
+    <label>
+        <input type="checkbox" ng-model="rename" /> Rename on Install: Process force renaming of machine to match CSV
+    </label>
+</div>
+<div class="checkbox">
+    <label>
+        <input type="checkbox" ng-model="clientid" /> Client Identifier: Process Client_Identifier to match CSV
+    </label>
+</div>
+<div class="checkbox">
+    <label>
+        <input type="checkbox" ng-model="repository" /> Repository: Move computers to match CSV repository
+    </label>
+</div>
