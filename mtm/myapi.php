@@ -327,7 +327,7 @@ class MyAPI extends API
                         $newgrp['description'] = $invars->repository_description;
                     }
                     $ret = $mtm->add_repository_with_managergroup($newgrp,$_SESSION['user']);
-                    $ret['status'] = ['error'=>0,'text'=>'OK'];
+                    $ret[0]['status'] = ['error'=>0,'text'=>'OK'];
                     return $ret;
                 }
                 catch(exception $e) {
@@ -513,7 +513,9 @@ class MyAPI extends API
                         }
                         $mgid = $mgids[0];
                     }
-                    return $mtm->add_usergroup_with_managergroup($invars->new_usergroup_name,$_SESSION['user'],$mgid);
+                    $ret = $mtm->add_usergroup_with_managergroup($invars->new_usergroup_name,$_SESSION['user'],$mgid);
+                    $ret[0]['status'] = ['error'=>0,'text'=>'OK'];
+                    return $ret;
                 }
                 catch (exception $e) {
                     return ['status'=>['error'=>1,'text'=>$e->getMessage()]];
@@ -546,6 +548,20 @@ class MyAPI extends API
 
         case 'DELETE':
             switch($this->verb) {
+            case 'id':
+                try {
+                    if(!isset($this->args[0])) {
+                        return ['status'=>['error'=>1,'text'=>'Need a valid usergroup ID to delete']];
+                    }
+                    $mtm = new MTM;
+                    $mtm->delete_usergroup($this->args[0],$_SESSION['user']);
+                    return ['status'=>['error'=>0,'text'=>'OK']];
+                }
+                catch (exception $e) {
+                    return ['status'=>['error'=>1,'text'=>$e->getMessage()]];
+                }
+                break;
+
             case 'shibgroup':
                 try {
                     $shib_auth = new Shib_Auth;

@@ -34,12 +34,20 @@
             <textarea class="form-control" rows="4" ng-model="usergroup_description"></textarea>
         </div>
         <input class="btn btn-primary" type="submit" value="Update Description" ng-click="update_description()" />
+	<div ng-show="delete1">
+	  <input class="btn btn-primary" type="submit" value="Delete group" ng-click="predelgroup()" />
+	</div>
+	<div ng-show="delete2">
+	  <input clase="btn btn-primary" type="submit" value="YES, DELETE!" ng-click="delgroup()" />
+	  <input clase="btn btn-primary" type="submit" value="Cancel" ng-click="predelgroupcancel()" />
+	</div>
     </form>
 </div>
 <div ng-show="!goodresults">
     <h3>No group found.</h3>
 </div>
 <hr/>
+
 
 <div ng-show="goodresults">
     

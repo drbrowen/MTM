@@ -900,6 +900,46 @@ class MTM  {
         return $this->_usergroup_to_array(array($ug));
     }
 
+    public function delete_usergroup($in_ID,$in_user = 'root') {
+        if($in_user !== 'root') {
+            if(!$this->check_user_perm_for_usergroup($in_user,$in_ID,'P','D')) {
+                throw new exception("delete_usergroup: You do not have permission");
+            }
+        }
+        $ugs = T_UserGroup::search('ID',$in_ID);
+        if(count($ugs)!=1) {
+            throw new exception("delete_usergroup: No such group");
+        }
+        $ug = $ugs[0];
+        $sa = new Shib_Auth;
+        $sgs = $sa->get_shibgroups_for_usergroup($in_ID,$in_user,0);
+        if(count($sgs)>0) {
+            throw new exception("delete_usergroup: Some shibboleth groups still associated, can't delete");
+        }
+        // Delete all users associated with this group.  These would be left over from previous logins.
+        $uiugs = T_User_in_Usergroup::search('UserGroup_ID',$in_ID);
+        foreach($uiugs as $uiug) {
+            $uiug->delete();
+        }
+        // Delete all portal permissions, whether acting or target.
+        $uhugps = T_UserGroup_has_UserGroup_Permission::search('Acting_UserGroup_ID',$in_ID);
+        foreach($uhugps as $uhugp) {
+            $uhugp->delete();
+        }
+        $uhups = T_UserGroup_has_UserGroup_Permission::search('Target_UserGroup_ID',$in_ID);
+        foreach($uhups as $uhup) {
+            $uhup->delete();
+        }
+        $uhrps = T_UserGroup_has_Repository_Permission::search('UserGroup_ID',$in_ID);
+        foreach($uhrps as $uhrp) {
+            $uhrp->delete();
+        }
+        $ug->delete();
+
+        return;
+        
+    }
+
     public function _usergroup_to_array($in_usergroups,$in_flags = 0) {
         $ret = [];
         foreach($in_usergroups as $usergroup) {

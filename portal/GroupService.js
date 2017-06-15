@@ -83,6 +83,12 @@ ComputerService.factory("GroupPerms",function($resource,myErrorHandler) {
 			      transformResponse: function(data) {return myErrorHandler.format(data)},
 			      interceptor: { responseError: myErrorHandler.doit}},
 	
+	'delusergroup': {method:'DELETE',
+			 url:'/api/v1/usergroups/id/:id',
+			 isArray:false,
+			 transformResponse: function(data) {return myErrorHandler.format(data)},
+			 interceptor: { responseError: myErrorHandler.doit}},
+
 	'adlookup': {method:'GET',
 			 url:"/api/v1/adgroups/samaccountname/:key",
 			 isArray:false,
@@ -212,7 +218,7 @@ app.controller("RepositoryAddController",function($scope,$routeParams,GroupPerms
 	    $scope.showerror = true;
 	} else {
 	    GroupPerms.addrepository({manager_usergroup_id:$scope.manager_usergroup_id,
-					 repository_fullpath:$scope.new_repository_fullpath,
+					repository_fullpath:$scope.new_repository_fullpath,
 					repository_description:$scope.new_repository_description,
 					repository_fileprefix:$scope.new_repository_fileprefix},
 					function(data) {
@@ -418,14 +424,14 @@ app.controller("UserGroupAddController",function($scope,$routeParams,GroupPerms,
 	console.log($scope.new_usergroup_name);
 	if(!angular.isDefined($scope.manager_usergroup_id) ||
 	   $scope.new_usergroup_name == '') {
-	    $scope.showerror = true;
+	   $scope.showerror = true;
 	} else {
 	    GroupPerms.addusergroup({manager_usergroup_id:$scope.manager_usergroup_id,
 				    new_usergroup_name:$scope.new_usergroup_name},
 				   function(data) {
-				       if(angular.isDefined(data.status)) {
-					   if(data.status.error == 0) {
-					       $location.url("/usergroups/search");
+				       if(angular.isDefined(data[0].status)) {
+					   if(data[0].status.error == 0) {
+					       $location.url("/usergroups/edit/id/" + data[0].id );
 					   } else {
 					       GroupPerms.setlastresults(data);
 					   }
@@ -441,6 +447,9 @@ app.controller("UserGroupAddController",function($scope,$routeParams,GroupPerms,
 app.controller("UserGroupEditController",function($scope,$routeParams,GroupPerms,$location) {
     $scope.showshibadd = false;
     $scope.showshibdelete = false;
+
+    $scope.delete1 = true;
+    $scope.delete2 = false;
 
     GroupPerms.usergroups({how:'id',
 			   key:$routeParams.key},
@@ -641,21 +650,46 @@ app.controller("UserGroupEditController",function($scope,$routeParams,GroupPerms
 	    $scope.showshibadd = false;
 	    $scope.newshibadgroup = '';
 	}
-    };
+    }
 
     $scope.gousergperms = function(activeID) {
 	$location.url("/useruserperms/" + $routeParams.key + "/" + activeID + '/A');
-    };
+    }
 
     $scope.fulllist= function() {
 	GroupPerms.setlastresults('');
 	$location.url('/usergroups/search');
     }
 
+    $scope.predelgroup = function() {
+	$scope.delete1 = false;
+	$scope.delete2 = true;
+    }
+
+    $scope.predelgroupcancel = function() {
+	$scope.delete1 = true;
+	$scope.delete2 = false;
+    }
+
+    $scope.delgroup = function()  {
+	GroupPerms.delusergroup({id:$routeParams.key},
+				function(data) {
+				    if(angular.isDefined(data.status)) {
+					if(data.status.error == 0){
+					    $location.url('/usergroups/search');
+					} else {
+					    GroupPerms.setlastresults(data);
+					    checklastresults();
+					    $scope.predelgroupcancel();
+					}
+				    }
+				});
+    }
 
 });
 
 //////////////////////////////
+
 
 app.controller("RepoPermAddController",function($scope,$routeParams,GroupPerms,$location) {
     GroupPerms.usergroups({how:'id',key:$routeParams.uid},
