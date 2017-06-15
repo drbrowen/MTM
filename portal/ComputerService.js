@@ -9,7 +9,7 @@ ComputerService.factory("myErrorHandler",function($window) {
 	//console.log(jsondata);
 	var data = angular.fromJson(jsondata);
 
-	if(angular.isDefined(data.status) && angular.isDefined(data.status.error) && data.status.error == 2) {
+	if(angular.isDefined(data) && angular.isDefined(data.status) && angular.isDefined(data.status.error) && data.status.error == 2) {
 	    var landingURL = "https://" + $window.location.host +
 		"/Portal/api/v1/login/";
 	    $window.open(landingURL,"_self");
@@ -44,11 +44,11 @@ ComputerService.factory("Computer",function($resource,myErrorHandler) {
 
     Comp.setlastresults = function(current_results) {
 	results = current_results;
-    };
+    }
 
     Comp.getlastresults = function() {
 	return results;
-    };
+    }
 
     return Comp;
 
@@ -65,11 +65,11 @@ ComputerService.factory("User",function($resource,myErrorHandler) {
 
     User.setlastresults = function(current_results) {
 	results = current_results;
-    };
+    }
 
     User.getlastresults = function() {
 	return results;
-    };
+    }
 
     return User;
 });
@@ -220,7 +220,7 @@ app.controller("ComputerEditController",function($scope,$location,$routeParams,C
 
 //    $scope.ischecked = function(test) {
 //	return test == 1;
-//    };
+//    }
 
     $scope.computer_update = function() {
 	var mycomp = new Computer({ID:$scope.editindex});
@@ -239,7 +239,7 @@ app.controller("ComputerEditController",function($scope,$location,$routeParams,C
 		}
 	    }
 	});
-    };
+    }
 
     $scope.edit_cancel = function() {
 	if($scope.form_repo.id != 0) {
@@ -248,7 +248,7 @@ app.controller("ComputerEditController",function($scope,$location,$routeParams,C
 	    $location.url('/computers/search');
 	}
 
-    };
+    }
 
     $scope.computers_add = function() {
 	var mycomp = new Computer();
@@ -264,7 +264,7 @@ app.controller("ComputerEditController",function($scope,$location,$routeParams,C
 		checklastresults();
 	    }
 	});
-    };
+    }
 
     $scope.processdata = function(data) {
 	$scope.form_name = data[0].name;
@@ -302,7 +302,7 @@ app.directive('fileModel', ['$parse', function ($parse) {
                 });
             });
         }
-    };
+    }
 }]);
 
 app.controller("ComputerCSVController",function($scope,$location,Computer) {
