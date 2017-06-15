@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 <?php
 
 include_once '/etc/makemunki/readconfig.php';
