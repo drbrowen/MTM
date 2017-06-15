@@ -25,3 +25,5 @@ else
     ln -s /usr/local/munki/00_MTM.run_directory /usr/local/munki/preflight
 fi
 
+killall "Managed Software Center"
+
