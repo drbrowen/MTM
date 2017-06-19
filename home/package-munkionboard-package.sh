@@ -4,7 +4,11 @@ GLOBAL_PACKAGEPATH="$1"
 
 VERSION="2.9.9"
 
-ONBOARDURL="https://munkidev.eps.uillinois.edu/ONBOARD"
+. ./bash-ini-parser
+cfg_parser '/etc/makemunki/config'
+cfg_section_main
+
+ONBOARDURL="$baseurl"
 
 if [ ! -d "$GLOBAL_PACKAGEPATH/Contents" -o ! -d "$GLOBAL_PACKAGEPATH/Scripts" ]; then
     exit 1

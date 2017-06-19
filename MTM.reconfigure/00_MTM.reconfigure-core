@@ -4,11 +4,11 @@ import sys
 import subprocess
 
 import re
-sys.path.append('/usr/local/munki/munkilib')
+sys.path.append('/usr/local/munki')
 
-import fetch
-import munkicommon
-import keychain
+from munkilib import fetch
+from munkilib import munkicommon
+from munkilib import keychain
 
 keychain_obj = keychain.MunkiKeychain()
 
