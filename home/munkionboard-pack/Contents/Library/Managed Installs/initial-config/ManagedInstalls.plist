@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+        <key>SuccessfulInstall</key>
+        <true/>
         <key>ClientIdentifier</key>
         <string></string>
         <key>InstallAppleSoftwareUpdates</key>
@@ -17,7 +19,7 @@
         <key>PendingUpdateCount</key>
         <integer>0</integer>
         <key>SoftwareRepoURL</key>
-        <string>https://munkidev.eps.uillinois.edu/ONBOARD</string>
+        <string>https://munki.eps.uillinois.edu/ONBOARD</string>
 </dict>
 </plist>
 

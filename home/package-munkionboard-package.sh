@@ -2,6 +2,11 @@
 
 GLOBAL_PACKAGEPATH="$1"
 
+if [ -z "$1" ]; then
+    echo "Usage: $0 <full path to munkionboard-pack directory>" >&2
+    exit 1
+fi
+
 VERSION="2.9.9"
 
 . ./bash-ini-parser
@@ -13,6 +18,9 @@ ONBOARDURL="$baseurl"
 if [ ! -d "$GLOBAL_PACKAGEPATH/Contents" -o ! -d "$GLOBAL_PACKAGEPATH/Scripts" ]; then
     exit 1
 fi
+if [ -d "$GLOBAL_PACKAGEPATH"/munkionboard-out/munkionboard-$VERSION.pkg ]; then
+    rm -rf "$GLOBAL_PACKAGEPATH"/munkionboard-out/munkionboard-$VERSION.pkg
+fi
 mkdir "$GLOBAL_PACKAGEPATH"/munkionboard-out/munkionboard-$VERSION.pkg
 
 cat - > "$GLOBAL_PACKAGEPATH/Contents/Library/Managed Installs/initial-config/ManagedInstalls.plist" <<EOF
@@ -20,6 +28,8 @@ cat - > "$GLOBAL_PACKAGEPATH/Contents/Library/Managed Installs/initial-config/Ma
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+        <key>SuccessfulInstall</key>
+        <true/>
         <key>ClientIdentifier</key>
         <string></string>
         <key>InstallAppleSoftwareUpdates</key>
@@ -35,7 +45,7 @@ cat - > "$GLOBAL_PACKAGEPATH/Contents/Library/Managed Installs/initial-config/Ma
         <key>PendingUpdateCount</key>
         <integer>0</integer>
         <key>SoftwareRepoURL</key>
-        <string>$ONBOARDURL</string>
+        <string>$ONBOARDURL/ONBOARD</string>
 </dict>
 </plist>
 
