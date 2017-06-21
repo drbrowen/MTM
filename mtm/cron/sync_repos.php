@@ -278,7 +278,7 @@ foreach($repos as $repo) {
     }
 
     $davconf = "";
-    $davconf .= "<Directory \"".$gconf->main->fullrepopath.'/'.$reponame."\">\n";
+    $davconf .= "<Directory \"".$gconf->main->fullrepopath.'/'.$repo["fullpath"]."\">\n";
     $davconf .= "  <LimitExcept PROPFIND GET OPTIONS>\n";
     // Only write individual requirements if we have at least 1 write group
     if(count($requireWrepos)>0) {
@@ -291,7 +291,7 @@ foreach($repos as $repo) {
     $davconf .= "  </LimitExcept>\n</Directory>\n";
 
 
-    $davconf .= "<Directory \"".$gconf->main->fullrepopath."/".$reponame."/pkgs\">\n";
+    $davconf .= "<Directory \"".$gconf->main->fullrepopath."/".$repo["fullpath"]."/pkgs\">\n";
     // First check if there are any read-only groups.
     if(count($requireRrepos)>0) {
         // Only output these lines if a write group exists
