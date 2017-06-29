@@ -949,9 +949,9 @@ app.controller("UserGroupPermEditController",function($scope,$routeParams,GroupP
 					 if(angular.isDefined(data.status)) {
 					     GroupPerms.setlastresults(data);
 					     checklastresults();
-					     //if(data.status.error == 0) {
-					     //    $location.url('/computers/search');
-					     //}
+					     if(data.status.error == 0) {
+					         $location.url('/usergroups/edit/id/' + $routeParams.uid);
+					     }
 					 }
 				     });
     }

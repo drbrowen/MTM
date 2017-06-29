@@ -71,8 +71,8 @@
             <tbody>
                 <tr dir-paginate="row in displayrepoperms |itemsPerPage: 10">
                     <td><a ng-click="setedit_repository(row.repository_id)">{{row.repository_name}}</a></td>
-                    <td><a ng-click="setedit_compgroupperms(row.computergroup_id)">{{row.portal_permission}}</a></td>
-                    <td><a ng-click="setedit_compgroupperms(row.computergroup_id)">{{row.repository_permission}}</a></td>
+                    <td><a ng-click="setedit_repoperms(row.repository_id)">{{row.portal_permission}}</a></td>
+                    <td><a ng-click="setedit_repoperms(row.repository_id)">{{row.repository_permission}}</a></td>
                 </tr>
             </tbody>
         </table>
