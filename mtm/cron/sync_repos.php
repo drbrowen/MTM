@@ -66,6 +66,7 @@ function gen_stub_entries($repos,$gconf) {
     $alldirs = [];
     // Loop to see what we should have.
     foreach($repos as $repo) {
+        debug_print(" Do ".$repo['fullpath']."\n");
         $keysize = strlen($repo['fileprefix']);
         $masterdirs[$repo['fullpath']] = [];
         $masterfiles[$repo['fullpath']] = [];
@@ -80,14 +81,18 @@ function gen_stub_entries($repos,$gconf) {
             $alldirs[$repo['fullpath']][$subdir] = [];
             foreach($entries as $entry) {
                 if(is_dir($scandir."/".$entry)) {
+                    //debug_print("Processing dir $entry\n");
                     $alldirs[$repo['fullpath']][$subdir][$entry] = 1;
                 } else {
+                    //debug_print("Processing file $entry\n");
                     $allfiles[$repo['fullpath']][$subdir][$entry] = 1;
                 }
                 if(strncmp($entry,$repo['fileprefix'],$keysize)==0) {
                     if(is_dir($scandir."/".$entry)) {
+                        debug_print("matching dir $entry\n");
                         $masterdirs[$repo['fullpath']][$subdir][$entry] = 1;
                     } else {
+                        debug_print("matching file $entry\n");
                         $masterfiles[$repo['fullpath']][$subdir][$entry] = 1;
                     }
                 }
@@ -109,7 +114,7 @@ function gen_stub_entries($repos,$gconf) {
             $parentkey = $repos[$parentpath]['fileprefix'];
             $parentkeysize = strlen($parentkey);
             $fullpath = $gconf->main->fullrepopath.$repo['fullpath'];
-            debug_print("  processing $parentpath\n");
+            debug_print("  processing $parentpath, looking for $parentkey\n");
             foreach($subdirs as $subdir) {
                 // First do deletes:
                 foreach($allfiles[$repo['fullpath']][$subdir] as $checkfile => $one) {
@@ -219,6 +224,7 @@ $rawrepos = $mtm->repositories_by_ID('*');
 $repos = [];
 foreach($rawrepos as $repo) {
     $repos[$repo['fullpath']] = $repo;
+    //debug_print("Repo = ".$repo['fullpath']."\n");
 }
 
 uasort($repos,'fullpathcompare');
