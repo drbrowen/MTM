@@ -265,26 +265,44 @@ foreach($repos as $repo) {
 
     file_put_contents($gconf->apache->per_repo_config."-temp/munkirepo-".$reponame.".conf",$outfile);
 
-    $perms = $mtm->get_usergroup_permissions_for_repository($repo['id']);
     $requireWrepos = [];
     $requireRrepos = [];
+    $requireRpkgs =  [];
+
+    foreach ($repos as $permrepo) {
+        if(strncmp($permrepo['fullpath'],$repo['fullpath'],strlen($repo['fullpath']))==0) {
+            $perms = $mtm->get_usergroup_permissions_for_repository($permrepo['id']);
+            foreach($perms as $perm) {
+                if(ereg('R',$perm['repository_permission'])) {
+                    $shibgroups = $sha->get_shibgroups_for_usergroup($perm['usergroup_id']);
+                    foreach($shibgroups as $shibgroup) {
+                        $requireRrepos[$shibgroup['ad_path']] = $shibgroup['ad_path'];
+                    }
+                }
+            }
+        }
+    }
+
+    $perms = $mtm->get_usergroup_permissions_for_repository($repo['id']);
     foreach($perms as $perm) {
         if(ereg('W',$perm['repository_permission'])) {
             $shibgroups = $sha->get_shibgroups_for_usergroup($perm['usergroup_id']);
             foreach($shibgroups as $shibgroup) {
-                $requireWrepos[] = $shibgroup['ad_path'];
+                $requireWrepos[$shibgroup['ad_path']] = $shibgroup['ad_path'];
+                $requireRrepos[$shibgroup['ad_path']] = $shibgroup['ad_path'];
+                $requireRpkgs[$shibgroup['ad_path']] = $shibgroup['ad_path'];
             }
         } 
         if(ereg('R',$perm['repository_permission'])) {
             $shibgroups = $sha->get_shibgroups_for_usergroup($perm['usergroup_id']);
             foreach($shibgroups as $shibgroup) {
-                $requireRrepos[] = $shibgroup['ad_path'];
+                $requireRpkgs[$shibgroup['ad_path']] = $shibgroup['ad_path'];
             }
-        }
+        } 
     }
 
     $davconf = "";
-    $davconf .= "<Directory \"".$gconf->main->fullrepopath.'/'.$repo["fullpath"]."\">\n";
+    $davconf .= "<Directory \"".$gconf->main->fullrepopath.$repo["fullpath"]."\">\n";
     $davconf .= "  <LimitExcept PROPFIND GET OPTIONS>\n";
     // Only write individual requirements if we have at least 1 write group
     if(count($requireWrepos)>0) {
@@ -294,16 +312,21 @@ foreach($repos as $repo) {
     } else {
         $davconf .= "    require all denied\n";
     }
-    $davconf .= "  </LimitExcept>\n</Directory>\n";
+    $davconf .= "  </LimitExcept>\n";
+    $davconf .= "  <Limit PROPFIND GET OPTIONS>\n";
+    foreach($requireRrepos as $requireRrepo) {
+        $davconf .= "    require ldap-group $requireRrepo\n";
+    }
+    $davconf .= "  </Limit>\n";
+    $davconf .= "</Directory>\n";
 
 
-    $davconf .= "<Directory \"".$gconf->main->fullrepopath."/".$repo["fullpath"]."/pkgs\">\n";
+    $davconf .= "<Directory \"".$gconf->main->fullrepopath.$repo["fullpath"]."/pkgs\">\n";
     // First check if there are any read-only groups.
     if(count($requireRrepos)>0) {
         // Only output these lines if a write group exists
         if(count($requireWrepos)>0) {
-            $davconf .= "  <LimitExcept PROPFIND GET OPTIONS>\n";
-            
+            $davconf .= "  <LimitExcept PROPFIND GET OPTIONS>\n";            
             foreach($requireWrepos as $requireWrepo) {
                 $davconf .= "    require ldap-group $requireWrepo\n";
             }
@@ -312,11 +335,8 @@ foreach($repos as $repo) {
 
         // Always output these lines, as we have at least one read-only group.
         $davconf .= "  <Limit PROPFIND GET OPTIONS>\n";
-        foreach($requireRrepos as $requireRrepo) {
-            $davconf .= "    require ldap-group $requireRrepo\n";
-        }
-        foreach($requireWrepos as $requireWrepo) {
-            $davconf .= "    require ldap-group $requireWrepo\n";
+        foreach($requireRpkgs as $requireRpkg) {
+            $davconf .= "    require ldap-group $requireRpkg\n";
         }
         $davconf .= "  </Limit>\n";
 
