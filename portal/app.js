@@ -9,6 +9,7 @@ app.config(function($routeProvider,$locationProvider) {
     $routeProvider
 
 	.when('/', {
+	    controller:'IndexController',
 	    templateUrl:'index2.html',
 	})
 

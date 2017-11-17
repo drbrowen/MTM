@@ -27,7 +27,7 @@ class MyAPI extends API
      */
     protected function whoami() {
         if ($this->method == 'GET') {
-            return $_SESSION['user'];
+            return ['user'=>$_SESSION['user']];
         } else {
             return [ 'error' => 'Only accepts GET to read-only interface' ];
         }
