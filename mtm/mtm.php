@@ -232,7 +232,7 @@ class MTM  {
     }
 
     public function delete_computer($in_ID,$in_user) {
-        $computers = T_Computer::Search('ID',$in_ID);
+        $computers = T_Computer::search('ID',$in_ID);
 
         if(count($computers) != 1) {
             throw new exception("delete_computer: can't find computer");
@@ -249,7 +249,7 @@ class MTM  {
         $cert_id = $comp->Certificate_ID;
         $comp->delete();
 
-        if(issset($cert_id) && $cert_id > 0) {
+        if(isset($cert_id) && $cert_id > 0) {
             $this->delete_cert($cert_id);
         }
 

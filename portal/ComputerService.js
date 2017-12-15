@@ -286,6 +286,30 @@ app.controller("ComputerEditController",function($scope,$location,$routeParams,C
 	$scope.showadd = 0;
 	$scope.showedit = 1;
     }
+
+    $scope.computer_delete = function() {
+	$scope.showconfirm = 1;
+    }
+
+
+    $scope.computer_cancel_confirm_delete = function() {
+	$scope.showconfirm = 0;
+    }
+
+    $scope.computer_confirm_delete = function() {
+	if(angular.isDefined($routeParams.how) && $routeParams.how == 'id') {
+	    Computer.delete({how:'id',key:$routeParams.id},function(data){
+		console.log(data);
+		if(angular.isDefined(data.status)) {
+		    Computer.setlastresults(data);
+		    checklastresults();
+		    if(data.status.error == 0) {
+			$location.url('/computers/search/repo/' + $scope.form_repo.id );
+		    }
+		}
+	    });
+	}
+    }
     
 });
 

@@ -247,8 +247,9 @@ class MyAPI extends API
             case 'id':
                 if(isset($this->args[0])) {
                     try {
+                        file_put_contents("/var/storage/phpsessions/deleteid",$this->args[0]);
                         $mtm = new MTM;
-                        $mtm->delete_computer($args[0],$_SESSION['user']);
+                        $mtm->delete_computer($this->args[0],$_SESSION['user']);
                         return ['status'=>['error'=>0,'text'=>'OK']];
                     } catch (exception $e) {
                         return ['status'=>['error'=>1,'text'=>$e->getMessage()]];
