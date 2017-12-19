@@ -321,39 +321,39 @@ foreach($repos as $repo) {
     $davconf .= "</Directory>\n";
 
 
-    $davconf .= "<Directory \"".$gconf->main->fullrepopath.$repo["fullpath"]."/pkgs\">\n";
-    // First check if there are any read-only groups.
-    if(count($requireRrepos)>0) {
-        // Only output these lines if a write group exists
-        if(count($requireWrepos)>0) {
-            $davconf .= "  <LimitExcept PROPFIND GET OPTIONS>\n";            
-            foreach($requireWrepos as $requireWrepo) {
-                $davconf .= "    require ldap-group $requireWrepo\n";
-            }
-            $davconf .= "  </LimitExcept>\n";
-        }
-
-        // Always output these lines, as we have at least one read-only group.
-        $davconf .= "  <Limit PROPFIND GET OPTIONS>\n";
-        foreach($requireRpkgs as $requireRpkg) {
-            $davconf .= "    require ldap-group $requireRpkg\n";
-        }
-        $davconf .= "  </Limit>\n";
-
-    } else {
-        // no read-only groups, check for a valid write group.
-        if(count($requireWrepos)>0) {
-            // With only write groups, no need for <Limit> or <LimitExcept>
-            foreach($requireWrepos as $requireWrepo) {
-                $davconf .= "  require ldap-group $requireWrepo\n";
-            }
-        } else {
-            // No read or write groups, so no permissions
-            $davconf .= "  require all denied\n";
-        }
-    }
-
-    $davconf .= "</Directory>\n";
+//    $davconf .= "<Directory \"".$gconf->main->fullrepopath.$repo["fullpath"]."/pkgs\">\n";
+//    // First check if there are any read-only groups.
+//    if(count($requireRrepos)>0) {
+//        // Only output these lines if a write group exists
+//        if(count($requireWrepos)>0) {
+//            $davconf .= "  <LimitExcept PROPFIND GET OPTIONS>\n";            
+//            foreach($requireWrepos as $requireWrepo) {
+//                $davconf .= "    require ldap-group $requireWrepo\n";
+//            }
+//            $davconf .= "  </LimitExcept>\n";
+//        }
+//
+//        // Always output these lines, as we have at least one read-only group.
+//        $davconf .= "  <Limit PROPFIND GET OPTIONS>\n";
+//        foreach($requireRrepos as $requireRrepo) {
+//            $davconf .= "    require ldap-group $requireRrepo\n";
+//        }
+//        $davconf .= "  </Limit>\n";
+//
+//    } else {
+//        // no read-only groups, check for a valid write group.
+//        if(count($requireWrepos)>0) {
+//            // With only write groups, no need for <Limit> or <LimitExcept>
+//            foreach($requireWrepos as $requireWrepo) {
+//                $davconf .= "  require ldap-group $requireWrepo\n";
+//            }
+//        } else {
+//            // No read or write groups, so no permissions
+//            $davconf .= "  require all denied\n";
+//        }
+//     }    
+//
+//    $davconf .= "</Directory>\n";
 
     $davconf .= gen_rewrite_lines($repo['fullpath'],$repos,$gconf);
 
