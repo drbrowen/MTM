@@ -238,8 +238,34 @@ class MyAPI extends API
             default:
                 return ['status'=>['error'=>1,'text'=>'I do not understand the request']];
                 break;
-     
+                 
             }
+            break;
+            
+        case 'DELETE':
+            switch($this->verb) {
+            case 'id':
+                if(isset($this->args[0])) {
+                    try {
+                        file_put_contents("/var/storage/phpsessions/deleteid",$this->args[0]);
+                        $mtm = new MTM;
+                        $mtm->delete_computer($this->args[0],$_SESSION['user']);
+                        return ['status'=>['error'=>0,'text'=>'OK']];
+                    } catch (exception $e) {
+                        return ['status'=>['error'=>1,'text'=>$e->getMessage()]];
+                    }
+                } else {
+                    return ['status'=>['error'=>1,'text'=>'ID not given']];
+                }
+                   
+                break;
+
+            default:
+                return ['status'=>['error'=>1,'text'=>'I do not understand the request']];
+                break;
+
+            }
+            break;
         }
     }
 

@@ -76,6 +76,9 @@
         <div class="col-sm-5 col-sm-offset-2">
             <button type="submit" class="btn btn-primary" ng-show="showadd" ng-click="computers_add()" value="Add Computer"/>Add Computer</button>
             <button type="submit" class="btn btn-primary" ng-show="showedit" ng-click="computer_update()" value="Update Computer"/>Update Computer</button>
+            <button type="submit" class="btn btn-primary" ng-show="showedit && (!showconfirm)" ng-click="computer_delete()" value="Delete Computer"/>Delete Computer</button>
+            <button type="submit" class="btn btn-primary" ng-show="showconfirm" ng-click="computer_cancel_confirm_delete()" value="CANCEL DELETE"/>CANCEL DELETE</button>
+            <button type="submit" class="btn btn-primary" ng-show="showconfirm" ng-click="computer_confirm_delete()" value="Confirm Delete"/>Confirm Delete</button>
             <button type="button" class="btn btn-default" ng-click="edit_cancel()" value="Cancel Page"/>Cancel</button>
         </div>
     </div>

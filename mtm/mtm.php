@@ -83,20 +83,15 @@ class MTM  {
 
     }
 
-    public function change_cert_status($in_certid,$status) {
-        $certs = T_Computer::Search("ID",$in_certid);
-        if(count($certs)==0) {
-            throw new exception("Can't find certificate to update");
-        }
-
-        $cert = $certs[0];
-
-        $cert->status = $status;
-        return $cert->save();
-    }
-    
     public function revoke_cert($in_computer_identifier) {
 
+    }
+
+    public function delete_cert($in_certid) {
+        $certs = T_Certificate::search('ID',$in_certid);
+        foreach($certs as $cert) {
+            $cert->delete();
+        }
     }
     
     public function add_computer($in,$in_user = 'root') {
@@ -233,6 +228,30 @@ class MTM  {
             $comp->status = 'reopened';
         }
         $comp->save();
+
+    }
+
+    public function delete_computer($in_ID,$in_user) {
+        $computers = T_Computer::search('ID',$in_ID);
+
+        if(count($computers) != 1) {
+            throw new exception("delete_computer: can't find computer");
+        }
+        $comp = $computers[0];
+
+        // Check permissions. Should have the 'P'/portal permission of 'C'/manage computers.
+        if($in_user !== 'root' && !$this->check_user_perm_for_computer($in_user,$comp->ID,'P','C')) {
+            throw new exception("delete_computer: user does not have permission for this repository");
+        }
+
+        // Note, we need to save the certificate ID and delete it _after_ deleting the computer
+        // otherwise, the DB will have an invalid pointer.
+        $cert_id = $comp->Certificate_ID;
+        $comp->delete();
+
+        if(isset($cert_id) && $cert_id > 0) {
+            $this->delete_cert($cert_id);
+        }
 
     }
 
