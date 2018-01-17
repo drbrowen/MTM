@@ -66,6 +66,7 @@
             <th st-sort="identifier" st-skip-natural="true">Serial Number</th>
             <th st-sort="status" st-skip-natural="true">Status</th>
             <th st-sort="forced_clientidentifier">Client Identifier (blank for default)</th>
+	    <th st-sort="use_template">Use Templates</th>
             <th st-sort="window_start_date" st-skip-natural="true">Window Start</th>
             <th st-sort="window_close_date" st-skip-natural="true">Window Close</th>
             <th st-sort="subject" st-skip-natural="true">Certificate Subject</th>
@@ -80,6 +81,7 @@
                     <td>{{row.identifier}}</td>
                     <td>{{row.status}}</td>
                     <td>{{row.forced_clientidentifier}}</td>
+		    <td>{{row.use_template}}</td>
                     <td>{{row.window_start_date}}</td>
                     <td>{{row.window_close_date}}</td>
                     <td>{{row.subject}}</td>

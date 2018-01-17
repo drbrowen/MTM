@@ -184,7 +184,16 @@ class MyAPI extends API
                             $invars->forced_clientidentifier;
                     }
                     if(isset($invars->rename_on_install)) {
-                        $params['rename_on_install'] = 1;
+                        $params['rename_on_install'] =
+                            $invars->rename_on_install;
+                    }
+                    if(isset($invars->use_template)) {
+                        $params['use_template'] =
+                            $invars->use_template;
+                    }
+                    if(isset($invars->force_retemplate)) {
+                        $params['force_retemplate'] = 
+                            $invars->force_retemplate;
                     }
                     $mtm = new MTM;
                     //file_put_contents('/tmp/doingit','Created cert, ready to add computer');

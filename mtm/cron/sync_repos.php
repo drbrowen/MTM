@@ -48,8 +48,10 @@ function fullpathcompare($a,$b) {
 }
 
 function create_repo_dir($repodir) {
-    mkdir($repodir);
-    $subdirs = [ 'pkgs','pkgsinfo','catalogs','manifests','icons','client_resources'];
+    if(!is_dir($repodir)) {
+        mkdir($repodir);
+    }
+    $subdirs = [ 'pkgs','pkgsinfo','catalogs','manifests','manifest_templates','icons','client_resources'];
     foreach ($subdirs as $subdir) {
         if(!is_dir($repodir.'/'.$subdir)) {
             mkdir($repodir.'/'.$subdir);
@@ -59,7 +61,7 @@ function create_repo_dir($repodir) {
 }
 
 function gen_stub_entries($repos,$gconf) { 
-    $subdirs = [ 'pkgs','pkgsinfo','catalogs','manifests','icons','client_resources'];
+    $subdirs = [ 'pkgs','pkgsinfo','catalogs','manifests','manifest_templates','icons','client_resources'];
     $masterfiles = [];
     $masterdirs = [];
     $allfiles = [];
@@ -230,9 +232,7 @@ $protorepofile = file_get_contents("/etc/makemunki/conf-per-repo-proto");
 foreach($repos as $repo) {
     $reponame = str_replace('/','-',substr($repo['fullpath'],1));
     $repodir = $gconf->main->fullrepopath.$repo['fullpath'];
-    if(!is_dir($repodir)) {
-        create_repo_dir($repodir);
-    }
+    create_repo_dir($repodir);
     
     $accesses = "";
     foreach($repos as $rfp => $repodata) {

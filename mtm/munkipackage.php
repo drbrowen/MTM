@@ -58,7 +58,7 @@ class MunkiPackage {
 
         $plistout .= $URL."</string>\n";
         $fci = $comp->forced_clientidentifier;
-        if(isset($fci) && $fci !== '') {
+        if(isset($fci) && $fci !== '' && $comp->use_template == 0) {
             $plistout .= "  <key>ClientIdentifier</key>\n  <string>".$fci."</string>\n";
         }
         $plistout .= "</dict>\n</plist>\n";

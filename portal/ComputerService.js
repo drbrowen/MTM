@@ -228,8 +228,15 @@ app.controller("ComputerEditController",function($scope,$location,$routeParams,C
 	mycomp.identifier = $scope.form_identifier;
 	mycomp.repository_id = $scope.form_repo.id;
 	mycomp.window = $scope.form_window;
-	mycomp.forced_clientidentifier = $scope.form_forced_clientidentifier;
 	mycomp.rename_on_install = $scope.form_rename_on_install;
+	mycomp.use_template = $scope.form_use_template;
+	if($scope.form_use_template) {
+	    mycomp.forced_clientidentifier = $scope.form_template.displayname;
+	} else {
+	    mycomp.forced_clientidentifier = $scope.form_forced_clientidentifier;
+	}
+	mycomp.force_retemplate = $scope.form_force_retemplate;
+	console.log(mycomp);
 	mycomp.$save({how:''}).then(function(data) {
 	    if(angular.isDefined(data.status)) {
 		Computer.setlastresults(data);
@@ -256,7 +263,12 @@ app.controller("ComputerEditController",function($scope,$location,$routeParams,C
 	mycomp.identifier = $scope.form_identifier;
 	mycomp.repository_id = $scope.form_repo.id;
 	mycomp.window = $scope.form_window;
-	mycomp.forced_clientidentifier = $scope.form_forced_clientidentifier;
+	mycomp.use_template = $scope.form_use_template;
+	if($scope.form_use_template) {
+	    mycomp.forced_clientidentifier = $form_template.displayname;
+	} else {
+	    mycomp.forced_clientidentifier = $scope.form_forced_clientidentifier;
+	}
 	mycomp.rename_on_install = $scope.form_rename_on_install;
 	mycomp.$save({how:''},function(data) {
 	    if(angular.isDefined(data.status)) {
@@ -275,9 +287,28 @@ app.controller("ComputerEditController",function($scope,$location,$routeParams,C
 		$scope.form_repo = value;
 	    }
 	});
+	$scope.templates = [{id:1,displayname:'Test 1'},{id:2,displayname:'Template 2'},{id:3,displayname:'ischool_desktop'}];
+	
+	$scope.form_template = $scope.templates[0];
+	angular.forEach($scope.templates,function(value,index) {
+	    if(value.displayname == data[0].forced_clientidentifier) {
+		$scope.form_template = value;
+	    }
+	});
+	console.log($scope.templates);
 	$scope.repository_id = data[0].repository_id;
 	$scope.form_window = data[0].window;
 	$scope.form_forced_clientidentifier = data[0].forced_clientidentifier;
+	if(data[0].use_template == 1) {
+	    $scope.form_use_template = true;
+	} else {
+	    $scope.form_use_template = false;
+	}
+	if(data[0].force_retemplate == 1) {
+	    $scope.form_force_retemplate = true;
+	} else {
+	    $scope.form_force_retemplate = false;
+	}
 	if(data[0].rename_on_install == 1) {
 	    $scope.form_rename_on_install = true;
 	} else {

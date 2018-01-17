@@ -58,10 +58,33 @@
     </div>
 
     <div class="form-group">
+        <label class="col-sm-2 control-label">Use Templates</label>
+        <div class="col-sm-5">
+            <input class="form-control" type="checkbox" ng-model="form_use_template" />
+            <span class="help-block">(Make Individual Manifest From Template)</span>
+        </div>
+    </div>
+
+    <div class="form-group" ng-show="!form_use_template">
         <label class="col-sm-2 control-label">Client Identifier</label>
         <div class="col-sm-5">
-            <input class="form-control" class="form-control" type="text" ng-model="form_forced_clientidentifier" />
+            <input class="form-control" type="text" ng-model="form_forced_clientidentifier" />
             <span class="help-block">(Leave Blank for Defaults)</span>
+        </div>
+    </div>
+
+    <div class="form-group" ng-show="form_use_template">
+        <label class="col-sm-2 control-label">Template Identifier</label>
+        <div class="col-sm-5">
+            <select class="form-control" type="select" ng-model="form_template" ng-options="template as template.displayname for template in templates track by template.id"></select>
+        </div>
+    </div>
+
+    <div class="form-group" ng-show="form_use_template && showedit">
+        <label class="col-sm-2 control-label">Force Retemplating</label>
+        <div class="col-sm-5">
+            <input class="form-control" type="checkbox" ng-model="form_force_retemplate" />
+            <span class="help-block">(Recopy the template to the individual manifest)</span>
         </div>
     </div>
 

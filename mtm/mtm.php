@@ -2,6 +2,7 @@
 // See LICENSE.txt for license.
 
 include_once '/etc/makemunki/readconfig.php';
+include_once 'manifest_template.php';
 
 class MTM  {
     const FLAGS_RAW = 1;
@@ -137,16 +138,17 @@ class MTM  {
         && $in['forced_clientidentifier'] !== "") {
             $comp->forced_clientidentifier = $in['forced_clientidentifier'];
         }
+
         if(isset($in['use_template'])) {
-            $comp->use_template = 1;
-        } else {
-            $comp->use_template = 0;
+            $comp->use_template = $in['use_template'];
+        }
+
+        if(isset($in['force_retemplate'])) {
+            $comp->use_template = $in['force_retemplate'];
         }
 
         if(isset($in['rename_on_install'])) {
-            $comp->rename_on_install = 1;
-        } else {
-            $comp->rename_on_install = 0;
+            $comp->rename_on_install = $in['rename_on_install'];
         }
         
         $now = time();
@@ -199,13 +201,13 @@ class MTM  {
             }
         }
 
-        if(isset($in_changes->use_template)) {
+        if(isset($in_changes->use_template) && $in_changes->use_template == 1) {
             $comp->use_template = 1;
         } else {
             $comp->use_template = 0;
         }
 
-        if(isset($in_changes->force_retemplate)) {
+        if(isset($in_changes->force_retemplate) && $in_changes->force_retemplate == 1) {
             $comp->force_retemplate = 1;
         } else {
             $comp->force_retemplate = 0;
