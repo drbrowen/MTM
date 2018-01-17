@@ -28,6 +28,8 @@
 	  <attr>identifier</attr>
 	  <attr>status</attr>
 	  <attr>forced_clientidentifier</attr>
+	  <attr>use_template</attr>
+	  <attr>force_retemplate</attr>
 	  <attr>rename_on_install</attr>
 	  <attr>window_start_date</attr>
 	  <attr>window_close_date</attr>

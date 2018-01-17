@@ -95,6 +95,13 @@ class MTM  {
     }
     
     public function add_computer($in,$in_user = 'root') {
+        if(!isset($in['name'],
+        $in['identifier'],
+        $in['repository_id'],
+        $in['window'])) {
+            throw new exception('add_computer: Not enough args to process.');
+        }
+
         if(is_numeric($in['window'])) {
             $window =(int)$in['window'];
         } else {
@@ -120,7 +127,7 @@ class MTM  {
         if(count($check)>0) {
             throw new exception("add_computer: Computer already exists.");
         }
-
+        
         $comp = new T_Computer();
         $comp->name = $in['name'];
         $comp->identifier = $in['identifier'];
@@ -130,6 +137,12 @@ class MTM  {
         && $in['forced_clientidentifier'] !== "") {
             $comp->forced_clientidentifier = $in['forced_clientidentifier'];
         }
+        if(isset($in['use_template'])) {
+            $comp->use_template = 1;
+        } else {
+            $comp->use_template = 0;
+        }
+
         if(isset($in['rename_on_install'])) {
             $comp->rename_on_install = 1;
         } else {
@@ -140,14 +153,14 @@ class MTM  {
         $comp->window_start_date = date("Y-m-d G:i:s",$now);
         $comp->window_close_date = date("Y-m-d G:i:s",$now + ($window * 60));
         $comp->save();
-
-        return ['status'=>['error'=>0,'text'=>'OK']];
         
+        return ['status'=>['error'=>0,'text'=>'OK']];
     }
+    
 
     public function update_computer_info($in_ID,$in_user = 'root',$in_changes) {
         $computers = T_Computer::Search('ID',$in_ID);
-
+        
         if(count($computers) != 1) {
             throw new exception("update_computer: can't find computer");
         }
@@ -186,6 +199,18 @@ class MTM  {
             }
         }
 
+        if(isset($in_changes->use_template)) {
+            $comp->use_template = 1;
+        } else {
+            $comp->use_template = 0;
+        }
+
+        if(isset($in_changes->force_retemplate)) {
+            $comp->force_retemplate = 1;
+        } else {
+            $comp->force_retemplate = 0;
+        }
+
         if(isset($in_changes->rename_on_install) && $in_changes->rename_on_install == 1) {
             $comp->rename_on_install = 1;
         } else {
@@ -198,6 +223,8 @@ class MTM  {
         
     }
     
+    // This function only opens the window, it doesn't change other
+    // paramters;
     public function readd_computer($in_ID,$in_user = 'root',$in_window) {
         if(is_numeric($in_window)) {
             $window =(int)$in_window;
@@ -304,6 +331,8 @@ class MTM  {
             $tmp['description'] = $comp->description;
             $tmp['status'] = $comp->status;
             $tmp['forced_clientidentifier'] = $comp->forced_clientidentifier;
+            $tmp['use_template'] = $comp->use_template;
+            $tmp['force_retemplate'] = $comp->force_retemplate;
             $tmp['rename_on_install'] = $comp->rename_on_install;
             $tmp['window_start_date'] = $comp->window_start_date;
             $tmp['window_close_date'] = $comp->window_close_date;
