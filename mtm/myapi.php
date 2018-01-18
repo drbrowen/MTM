@@ -313,6 +313,17 @@ class MyAPI extends API
                     return ['status'=>['error'=>1,'text'=>$e->getMessage()]];
                 }
                 
+
+            case 'templates':
+                $mtm = new MTM;
+                try { return $mtm->get_template_manifests($_SESSION['user'],$this->args[0]);
+                }
+                catch(exception $e) {
+                    return ['status'=>['error'=>1,'text'=>$e->getMessage()]];
+                }
+                
+                break;
+                
             default:
                 return ['status'=>['error'=>1,'text'=>'I do not understand the request']];
                 break;

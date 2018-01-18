@@ -52,11 +52,19 @@ class MTM  {
         if(count($certs)!=0) {
             if($comp->status !== "reopened") {
                 throw new exception("Certificate for this identifier already exists.");
-            } else {
-                $comp->status = 'issued';
-                $comp->save();
-                return $comp;
             }
+            
+            $startwindow = date_timestamp_get(date_create($comp->window_start_date));
+            $endwindow = date_timestamp_get(date_create($comp->window_end_date));
+            $now = time();
+
+            if( ($now - $startwindow) < 0 || ($endwindow - $now)  < 0) {
+                throw new exception("Out of time");
+            }            
+
+            $comp->status = 'issued';
+            $comp->save();
+            return $comp;
         }
 
         $cert = new T_Certificate;
@@ -123,7 +131,10 @@ class MTM  {
             throw new exception("add_computer: user does not have permission for this repository");
         }
 
-        $check = T_Computer::Search(['name','Repository_ID'],[$in['name'],$repos[0]],['=','=']);
+        $mt = new Manifest_Template;
+        
+
+        $check = T_Computer::search(['name','Repository_ID'],[$in['name'],$repos[0]],['=','=']);
 
         if(count($check)>0) {
             throw new exception("add_computer: Computer already exists.");
@@ -144,7 +155,7 @@ class MTM  {
         }
 
         if(isset($in['force_retemplate'])) {
-            $comp->use_template = $in['force_retemplate'];
+            $comp->force_retemplate = $in['force_retemplate'];
         }
 
         if(isset($in['rename_on_install'])) {
@@ -155,7 +166,11 @@ class MTM  {
         $comp->window_start_date = date("Y-m-d G:i:s",$now);
         $comp->window_close_date = date("Y-m-d G:i:s",$now + ($window * 60));
         $comp->save();
-        
+
+        if($comp->use_template == 1) {
+            $mt->copy_template_file($repos[0]->fullpath,$comp->forced_clientidentifier,$comp->force_retemplate);
+        }
+
         return ['status'=>['error'=>0,'text'=>'OK']];
     }
     
@@ -173,12 +188,17 @@ class MTM  {
             throw new exception("update_computer: user does not have permission for this repository");
         }
 
+        $repo = '';
         if(isset($in_changes->fullpath)) {
             if($in_user !== 'root' && !$this->check_user_perm_for_repository($in_user,$in_changes->fullpath,'P','C')) {
                 throw new exception("update_computer: user does not have permission for the new repository");
             }
-            $newgrp = T_Repository::Search('fullpath',$in_changes->fullpath);
-            $comp->Repository_ID = $newgrp[0];
+            $repos = T_Repository::search('fullpath',$in_changes->fullpath);
+            $comp->Repository_ID = $repos[0];
+            $repo = $repos[0];
+        } else {
+            $repos = T_Repository::search('ID',$comp->Repository_ID);
+            $repo = $repos[0];
         }
         
         if(isset($in_changes->name) && $in_changes->name !== $comp->name) {
@@ -217,6 +237,12 @@ class MTM  {
             $comp->rename_on_install = 1;
         } else {
             $comp->rename_on_install = 0;
+        }
+
+        if($comp->use_template == 1) {
+            $mt = new Manifest_Template;
+            $mt->copy_template_file($repo->fullpath,$comp->identifier,$comp->forced_clientidentifier,$comp->force_retemplate);
+            $comp->force_retemplate = 0;
         }
 
         $comp->save();
@@ -398,6 +424,21 @@ class MTM  {
         
         $ret = $this->_computer_to_array($comps,$in_flags);
         return $ret;
+    }
+
+    public function get_template_manifests($in_user,$in_repository_id) {
+        $repos = T_Repository::search('ID',$in_repository_id);
+        if(count($repos) != 1) {
+            throw new exception("get_template_manifests: user does not have permission for this repository");
+        }
+        $repo = $repos[0];
+            
+        if($in_user !== 'root' && !$this->check_user_perm_for_repository($in_user,$repo->fullpath,'P','C')) {
+            throw new exception("get_template_manifests: user does not have permission for this repository");
+        }
+
+        $mt = new Manifest_Template;
+        return $mt->get_template_options($repo->fullpath);
     }
 
     public function get_repositories_for_user($in_user) {

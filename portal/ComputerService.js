@@ -35,6 +35,11 @@ ComputerService.factory("Computer",function($resource,myErrorHandler) {
 		       isArray:true,
 		       transformResponse: function(data) {return myErrorHandler.format(data)},
 		       interceptor: {responseError: myErrorHandler.doit}},
+	'templates': {method:'GET',
+		      url: "/api/v1/repositories/templates/:id",
+		      isArray:true,
+		      transformResponse: function(data) {return myErrorHandler.format(data)},
+		      interceptor: {responseError: myErrorHandler.doit}},
 	'csv': {method:'POST',
 		url: "/api/v1/computers/csv",
 		isArray:false,
@@ -278,6 +283,15 @@ app.controller("ComputerEditController",function($scope,$location,$routeParams,C
 	});
     }
 
+    $scope.processtemplates = function(data) {	
+	$scope.templates = data;
+	angular.forEach($scope.templates,function(value,index) {
+	    if(value.displayname == $scope.form_forced_clientidentifier) {
+		$scope.form_template = value;
+	    }
+	});
+    }
+
     $scope.processdata = function(data) {
 	$scope.form_name = data[0].name;
 	$scope.form_identifier = data[0].identifier;
@@ -285,14 +299,6 @@ app.controller("ComputerEditController",function($scope,$location,$routeParams,C
 	angular.forEach($scope.repos,function(value,index) {
 	    if(value.id == data[0].repository_id) {
 		$scope.form_repo = value;
-	    }
-	});
-	$scope.templates = [{id:1,displayname:'Test 1'},{id:2,displayname:'Template 2'},{id:3,displayname:'ischool_desktop'}];
-	
-	$scope.form_template = $scope.templates[0];
-	angular.forEach($scope.templates,function(value,index) {
-	    if(value.displayname == data[0].forced_clientidentifier) {
-		$scope.form_template = value;
 	    }
 	});
 	console.log($scope.templates);
@@ -316,6 +322,9 @@ app.controller("ComputerEditController",function($scope,$location,$routeParams,C
 	}
 	$scope.showadd = 0;
 	$scope.showedit = 1;
+	Computer.templates({id:$scope.repository_id},function(data) {
+	    $scope.processtemplates(data);
+	});
     }
 
     $scope.computer_delete = function() {

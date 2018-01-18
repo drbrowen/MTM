@@ -19,12 +19,21 @@ class Manifest_Template {
             throw new exception("get_template_options: Invalid directory specification");
         }
 
-        return array_diff(scandir($fspath), array('..', '.'));        
+        $files = array_diff(scandir($fspath), array('..', '.'));
+        $ret = [];
+        $i = 0;
+        foreach($files as $file) {
+            $tmp = [];
+            $tmp['displayname'] = $file;
+            $tmp['id'] = $i++;
+            $ret[] = $tmp;
+        }
+        return $ret;
     }
 
     public function copy_template_file($in_repo_path,$in_manifest_name,$in_template_name,$force_retemplate) {
-        $srcpath = $this->gconf->main_fullrepopath.$in_repo_path.'/manifest_templates/'.$in_template_name;
-        $dstpath = $this->gconf->main_fullrepopath.$in_repo_path.'/manifests/'.$in_manifest_name;
+        $srcpath = $this->gconf->main->fullrepopath.$in_repo_path.'/manifest_templates/'.$in_template_name;
+        $dstpath = $this->gconf->main->fullrepopath.$in_repo_path.'/manifests/'.$in_manifest_name;
 
         if(is_file($dstpath) && $force_retemplate == 0) {
             return 0;
