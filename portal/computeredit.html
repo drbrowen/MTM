@@ -46,7 +46,7 @@
     <div class="form-group">
         <label class="col-sm-2 control-label">Repository</label>
         <div class="col-sm-5">
-            <select class="form-control" ng-model="form_repo" ng-options="repo as repo.fullpath for repo in repos track by repo.id"></select>
+            <select class="form-control" ng-model="form_repo" ng-options="repo as repo.fullpath for repo in repos track by repo.id" ng-change="loadnewtemplates()"></select>
         </div>
     </div>
 

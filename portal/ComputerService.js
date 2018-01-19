@@ -216,6 +216,7 @@ app.controller("ComputerEditController",function($scope,$location,$routeParams,C
 		} else  {
 		    $scope.form_repo = $scope.repos[0];
 		}
+		$scope.loadnewtemplates();
 		$scope.form_rename_on_install = true;
 	    });
 	
@@ -283,8 +284,15 @@ app.controller("ComputerEditController",function($scope,$location,$routeParams,C
 	});
     }
 
+    $scope.loadnewtemplates = function() {
+	Computer.templates({id:$scope.form_repo.id},function(data) {
+	    $scope.processtemplates(data);
+	});
+    }
+
     $scope.processtemplates = function(data) {	
 	$scope.templates = data;
+	$scope.form_template = $scope.templates[0];
 	angular.forEach($scope.templates,function(value,index) {
 	    if(value.displayname == $scope.form_forced_clientidentifier) {
 		$scope.form_template = value;
