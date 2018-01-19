@@ -68,6 +68,7 @@ function gen_stub_entries($repos,$gconf) {
     $alldirs = [];
     // Loop to see what we should have.
     foreach($repos as $repo) {
+        debug_print(" Do ".$repo['fullpath']."\n");
         $keysize = strlen($repo['fileprefix']);
         $masterdirs[$repo['fullpath']] = [];
         $masterfiles[$repo['fullpath']] = [];
@@ -82,14 +83,18 @@ function gen_stub_entries($repos,$gconf) {
             $alldirs[$repo['fullpath']][$subdir] = [];
             foreach($entries as $entry) {
                 if(is_dir($scandir."/".$entry)) {
+                    //debug_print("Processing dir $entry\n");
                     $alldirs[$repo['fullpath']][$subdir][$entry] = 1;
                 } else {
+                    //debug_print("Processing file $entry\n");
                     $allfiles[$repo['fullpath']][$subdir][$entry] = 1;
                 }
                 if(strncmp($entry,$repo['fileprefix'],$keysize)==0) {
                     if(is_dir($scandir."/".$entry)) {
+                        debug_print("matching dir $entry\n");
                         $masterdirs[$repo['fullpath']][$subdir][$entry] = 1;
                     } else {
+                        debug_print("matching file $entry\n");
                         $masterfiles[$repo['fullpath']][$subdir][$entry] = 1;
                     }
                 }
@@ -111,7 +116,7 @@ function gen_stub_entries($repos,$gconf) {
             $parentkey = $repos[$parentpath]['fileprefix'];
             $parentkeysize = strlen($parentkey);
             $fullpath = $gconf->main->fullrepopath.$repo['fullpath'];
-            debug_print("  processing $parentpath\n");
+            debug_print("  processing $parentpath, looking for $parentkey\n");
             foreach($subdirs as $subdir) {
                 // First do deletes:
                 foreach($allfiles[$repo['fullpath']][$subdir] as $checkfile => $one) {
@@ -221,6 +226,7 @@ $rawrepos = $mtm->repositories_by_ID('*');
 $repos = [];
 foreach($rawrepos as $repo) {
     $repos[$repo['fullpath']] = $repo;
+    //debug_print("Repo = ".$repo['fullpath']."\n");
 }
 
 uasort($repos,'fullpathcompare');
@@ -259,26 +265,44 @@ foreach($repos as $repo) {
 
     file_put_contents($gconf->apache->per_repo_config."-temp/munkirepo-".$reponame.".conf",$outfile);
 
-    $perms = $mtm->get_usergroup_permissions_for_repository($repo['id']);
     $requireWrepos = [];
     $requireRrepos = [];
+    $requireRpkgs =  [];
+
+    foreach ($repos as $permrepo) {
+        if(strncmp($permrepo['fullpath'],$repo['fullpath'],strlen($repo['fullpath']))==0) {
+            $perms = $mtm->get_usergroup_permissions_for_repository($permrepo['id']);
+            foreach($perms as $perm) {
+                if(ereg('R',$perm['repository_permission'])) {
+                    $shibgroups = $sha->get_shibgroups_for_usergroup($perm['usergroup_id']);
+                    foreach($shibgroups as $shibgroup) {
+                        $requireRrepos[$shibgroup['ad_path']] = $shibgroup['ad_path'];
+                    }
+                }
+            }
+        }
+    }
+
+    $perms = $mtm->get_usergroup_permissions_for_repository($repo['id']);
     foreach($perms as $perm) {
         if(ereg('W',$perm['repository_permission'])) {
             $shibgroups = $sha->get_shibgroups_for_usergroup($perm['usergroup_id']);
             foreach($shibgroups as $shibgroup) {
-                $requireWrepos[] = $shibgroup['ad_path'];
+                $requireWrepos[$shibgroup['ad_path']] = $shibgroup['ad_path'];
+                $requireRrepos[$shibgroup['ad_path']] = $shibgroup['ad_path'];
+                $requireRpkgs[$shibgroup['ad_path']] = $shibgroup['ad_path'];
             }
         } 
         if(ereg('R',$perm['repository_permission'])) {
             $shibgroups = $sha->get_shibgroups_for_usergroup($perm['usergroup_id']);
             foreach($shibgroups as $shibgroup) {
-                $requireRrepos[] = $shibgroup['ad_path'];
+                $requireRpkgs[$shibgroup['ad_path']] = $shibgroup['ad_path'];
             }
-        }
+        } 
     }
 
     $davconf = "";
-    $davconf .= "<Directory \"".$gconf->main->fullrepopath.'/'.$repo["fullpath"]."\">\n";
+    $davconf .= "<Directory \"".$gconf->main->fullrepopath.$repo["fullpath"]."\">\n";
     $davconf .= "  <LimitExcept PROPFIND GET OPTIONS>\n";
     // Only write individual requirements if we have at least 1 write group
     if(count($requireWrepos)>0) {
@@ -288,46 +312,48 @@ foreach($repos as $repo) {
     } else {
         $davconf .= "    require all denied\n";
     }
-    $davconf .= "  </LimitExcept>\n</Directory>\n";
-
-
-    $davconf .= "<Directory \"".$gconf->main->fullrepopath."/".$repo["fullpath"]."/pkgs\">\n";
-    // First check if there are any read-only groups.
-    if(count($requireRrepos)>0) {
-        // Only output these lines if a write group exists
-        if(count($requireWrepos)>0) {
-            $davconf .= "  <LimitExcept PROPFIND GET OPTIONS>\n";
-            
-            foreach($requireWrepos as $requireWrepo) {
-                $davconf .= "    require ldap-group $requireWrepo\n";
-            }
-            $davconf .= "  </LimitExcept>\n";
-        }
-
-        // Always output these lines, as we have at least one read-only group.
-        $davconf .= "  <Limit PROPFIND GET OPTIONS>\n";
-        foreach($requireRrepos as $requireRrepo) {
-            $davconf .= "    require ldap-group $requireRrepo\n";
-        }
-        foreach($requireWrepos as $requireWrepo) {
-            $davconf .= "    require ldap-group $requireWrepo\n";
-        }
-        $davconf .= "  </Limit>\n";
-
-    } else {
-        // no read-only groups, check for a valid write group.
-        if(count($requireWrepos)>0) {
-            // With only write groups, no need for <Limit> or <LimitExcept>
-            foreach($requireWrepos as $requireWrepo) {
-                $davconf .= "  require ldap-group $requireWrepo\n";
-            }
-        } else {
-            // No read or write groups, so no permissions
-            $davconf .= "  require all denied\n";
-        }
+    $davconf .= "  </LimitExcept>\n";
+    $davconf .= "  <Limit PROPFIND GET OPTIONS>\n";
+    foreach($requireRrepos as $requireRrepo) {
+        $davconf .= "    require ldap-group $requireRrepo\n";
     }
-
+    $davconf .= "  </Limit>\n";
     $davconf .= "</Directory>\n";
+
+
+//    $davconf .= "<Directory \"".$gconf->main->fullrepopath.$repo["fullpath"]."/pkgs\">\n";
+//    // First check if there are any read-only groups.
+//    if(count($requireRrepos)>0) {
+//        // Only output these lines if a write group exists
+//        if(count($requireWrepos)>0) {
+//            $davconf .= "  <LimitExcept PROPFIND GET OPTIONS>\n";            
+//            foreach($requireWrepos as $requireWrepo) {
+//                $davconf .= "    require ldap-group $requireWrepo\n";
+//            }
+//            $davconf .= "  </LimitExcept>\n";
+//        }
+//
+//        // Always output these lines, as we have at least one read-only group.
+//        $davconf .= "  <Limit PROPFIND GET OPTIONS>\n";
+//        foreach($requireRrepos as $requireRrepo) {
+//            $davconf .= "    require ldap-group $requireRrepo\n";
+//        }
+//        $davconf .= "  </Limit>\n";
+//
+//    } else {
+//        // no read-only groups, check for a valid write group.
+//        if(count($requireWrepos)>0) {
+//            // With only write groups, no need for <Limit> or <LimitExcept>
+//            foreach($requireWrepos as $requireWrepo) {
+//                $davconf .= "  require ldap-group $requireWrepo\n";
+//            }
+//        } else {
+//            // No read or write groups, so no permissions
+//            $davconf .= "  require all denied\n";
+//        }
+//     }    
+//
+//    $davconf .= "</Directory>\n";
 
     $davconf .= gen_rewrite_lines($repo['fullpath'],$repos,$gconf);
 
