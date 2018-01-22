@@ -51,7 +51,7 @@ function create_repo_dir($repodir) {
     if(!is_dir($repodir)) {
         mkdir($repodir);
     }
-    $subdirs = [ 'pkgs','pkgsinfo','catalogs','manifests','manifest_templates','icons','client_resources'];
+    $subdirs = [ 'pkgs','pkgsinfo','catalogs','manifests','manifests/templates','icons','client_resources'];
     foreach ($subdirs as $subdir) {
         if(!is_dir($repodir.'/'.$subdir)) {
             mkdir($repodir.'/'.$subdir);
@@ -61,7 +61,7 @@ function create_repo_dir($repodir) {
 }
 
 function gen_stub_entries($repos,$gconf) { 
-    $subdirs = [ 'pkgs','pkgsinfo','catalogs','manifests','manifest_templates','icons','client_resources'];
+    $subdirs = [ 'pkgs','pkgsinfo','catalogs','manifests','manifests/templates','icons','client_resources'];
     $masterfiles = [];
     $masterdirs = [];
     $allfiles = [];

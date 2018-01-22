@@ -12,7 +12,7 @@ class Manifest_Template {
     }
 
     public function get_template_options($in_repo_path) {
-        $fspath = $this->gconf->main->fullrepopath.$in_repo_path.'/manifest_templates';
+        $fspath = $this->gconf->main->fullrepopath.$in_repo_path.'/manifests/templates';
 
 
         if(!is_dir($fspath)) {
@@ -32,7 +32,7 @@ class Manifest_Template {
     }
 
     public function copy_template_file($in_repo_path,$in_manifest_name,$in_template_name,$force_retemplate) {
-        $srcpath = $this->gconf->main->fullrepopath.$in_repo_path.'/manifest_templates/'.$in_template_name;
+        $srcpath = $this->gconf->main->fullrepopath.$in_repo_path.'/manifests/templates/'.$in_template_name;
         $dstpath = $this->gconf->main->fullrepopath.$in_repo_path.'/manifests/'.$in_manifest_name;
 
         if(is_file($dstpath) && $force_retemplate == 0) {
