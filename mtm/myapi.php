@@ -117,12 +117,12 @@ class MyAPI extends API
         case 'POST':
             $invarsraw = file_get_contents('php://input');
             $invars = json_decode($invarsraw);
-            #ob_start();
-            #var_dump($invars);
-            #var_dump($this->verb);
-            #var_dump($this->args);
-            #$textdata = ob_get_clean();
-            #file_put_contents('/var/storage/phpsessions/textdata',$textdata);
+            //ob_start();
+            //var_dump($invars);
+            //var_dump($this->verb);
+            //var_dump($this->args);
+            //$textdata = ob_get_clean();
+            //file_put_contents('/var/storage/phpsessions/textdata',$textdata);
 
             switch($this->verb) {
             case '':
@@ -157,10 +157,10 @@ class MyAPI extends API
                         $invars);
                     }
                     catch(exception $e) {
-                        #ob_start();
-                        #var_dump($e);
-                        #$log = ob_get_clean();
-                        #file_put_contents('/tmp/exception',$log);
+                        //ob_start();
+                        //var_dump($e);
+                        //$log = ob_get_clean();
+                        //file_put_contents('/tmp/exception',$log);
                         return ['status'=>['error'=>1,'text'=>$e->getMessage()]];
                     }
 
@@ -233,8 +233,17 @@ class MyAPI extends API
                     if(isset($invars->clientid)) {
                         $params['clientid'] = $invars->clientid;
                     }
+                    if(isset($invars->template)) {
+                        $params['template'] = $invars->template;
+                    }
+                    if(isset($invars->retemplate)) {
+                        $params['retemplate'] = $invars->retemplate;
+                    }
                     if(isset($invars->repository)) {
                         $params['repository'] = $invars->repository;
+                    }
+                    if(isset($invars->delete)) {
+                        $params['delete'] = $invars->delete;
                     }
                         
                     $val = $mtm->load_csv_for_repository($params,$_SESSION['user']);
@@ -256,7 +265,7 @@ class MyAPI extends API
             case 'id':
                 if(isset($this->args[0])) {
                     try {
-                        file_put_contents("/var/storage/phpsessions/deleteid",$this->args[0]);
+                        //file_put_contents("/var/storage/phpsessions/deleteid",$this->args[0]);
                         $mtm = new MTM;
                         $mtm->delete_computer($this->args[0],$_SESSION['user']);
                         return ['status'=>['error'=>0,'text'=>'OK']];
@@ -332,12 +341,12 @@ class MyAPI extends API
         case 'POST':
             $invarsraw = file_get_contents('php://input');
             $invars = json_decode($invarsraw);
-            ob_start();
-            var_dump($invars);
-            var_dump($this->verb);
-            var_dump($this->args);
-            $textdata = ob_get_clean();
-            file_put_contents('/var/storage/phpsessions/textdata',$textdata);
+            //ob_start();
+            //var_dump($invars);
+            //var_dump($this->verb);
+            //var_dump($this->args);
+            //$textdata = ob_get_clean();
+            //file_put_contents('/var/storage/phpsessions/textdata',$textdata);
 
             switch($this->verb) {
             case 'addperms':
@@ -501,12 +510,12 @@ class MyAPI extends API
         case 'POST':
             $invarsraw = file_get_contents('php://input');
             $invars = json_decode($invarsraw);
-            ob_start();
-            var_dump($invars);
-            var_dump($this->verb);
-            var_dump($this->args);
-            $textdata = ob_get_clean();
-            file_put_contents('/var/storage/phpsessions/textdata',$textdata);
+            //ob_start();
+            //var_dump($invars);
+            //var_dump($this->verb);
+            //var_dump($this->args);
+            //$textdata = ob_get_clean();
+            //file_put_contents('/var/storage/phpsessions/textdata',$textdata);
 
             switch($this->verb) {
             case 'addperms':

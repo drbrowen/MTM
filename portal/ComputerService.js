@@ -271,7 +271,7 @@ app.controller("ComputerEditController",function($scope,$location,$routeParams,C
 	mycomp.window = $scope.form_window;
 	mycomp.use_template = $scope.form_use_template;
 	if($scope.form_use_template) {
-	    mycomp.forced_clientidentifier = $form_template.displayname;
+	    mycomp.forced_clientidentifier = $scope.form_template.displayname;
 	} else {
 	    mycomp.forced_clientidentifier = $scope.form_forced_clientidentifier;
 	}
@@ -280,6 +280,9 @@ app.controller("ComputerEditController",function($scope,$location,$routeParams,C
 	    if(angular.isDefined(data.status)) {
 		Computer.setlastresults(data);
 		checklastresults();
+		if(data.status.error == 0) {
+		    $location.url('/computers/search/repo/' + $scope.form_repo.id );
+		}
 	    }
 	});
     }
@@ -400,6 +403,7 @@ app.controller("ComputerCSVController",function($scope,$location,Computer) {
 	    $scope.lastresults = 0;
 	}
     }
+    Computer.setlastresults([]);
 
     checklastresults();
 
@@ -409,14 +413,20 @@ app.controller("ComputerCSVController",function($scope,$location,Computer) {
 	var window = ($scope.window?1:0);
 	var rename = ($scope.rename?1:0);
 	var clientid = ($scope.clientid?1:0);
+	var template = ($scope.template?1:0);
+	var retemplate = ($scope.retemplate?1:0);
 	var repo = ($scope.repository?1:0);
+	var del = ($scope.DELETE?1:0);
 	Computer.csv({csv:csv,
 		      add:add,
 		      name:name,
 		      window:window,
 		      rename:rename,
 		      clientid:clientid,
-		      repository:repo},function(data) {
+		      template:template,
+		      retemplate:retemplate,
+		      repository:repo,
+		      "delete":del},function(data) {
 			  if(angular.isDefined(data.status)) {
 			      Computer.setlastresults(data);
 			      checklastresults();

@@ -75,7 +75,7 @@ class MTM  {
         $results = shell_exec("sudo -u makemunki /etc/makemunki/sign_certificate.sh ".$cert->ID);
         // Hack as sudo isn't working properly on this machine.
         //$results = shell_exec("/etc/makemunki/sign_certificate.sh ".$cert->ID);
-        file_put_contents("/var/storage/phpsessions/mtmout","Received results: ".$results."\n");
+        #file_put_contents("/var/storage/phpsessions/mtmout","Received results: ".$results."\n");
 
         $certs = T_Certificate::search('ID',$cert->ID);
         $cert = $certs[0];
@@ -168,7 +168,7 @@ class MTM  {
         $comp->save();
 
         if($comp->use_template == 1) {
-            $mt->copy_template_file($repos[0]->fullpath,$comp->forced_clientidentifier,$comp->force_retemplate);
+            $mt->copy_template_file($repos[0]->fullpath,$comp->identifier,$comp->forced_clientidentifier,$comp->force_retemplate);
         }
 
         return ['status'=>['error'=>0,'text'=>'OK']];
@@ -177,6 +177,11 @@ class MTM  {
 
     public function update_computer_info($in_ID,$in_user = 'root',$in_changes) {
         $computers = T_Computer::Search('ID',$in_ID);
+
+        ob_start();
+        var_dump($in_changes);
+        $print = ob_get_clean();
+        file_put_contents("/var/storage/phpsessions/update_computer_info",$print);
         
         if(count($computers) != 1) {
             throw new exception("update_computer: can't find computer");
@@ -221,22 +226,28 @@ class MTM  {
             }
         }
 
-        if(isset($in_changes->use_template) && $in_changes->use_template == 1) {
-            $comp->use_template = 1;
-        } else {
-            $comp->use_template = 0;
+        if(isset($in_changes->use_template)) {
+            if($in_changes->use_template == 1) {
+                $comp->use_template = 1;
+            } else {
+                $comp->use_template = 0;
+            }
         }
 
-        if(isset($in_changes->force_retemplate) && $in_changes->force_retemplate == 1) {
-            $comp->force_retemplate = 1;
-        } else {
-            $comp->force_retemplate = 0;
+        if(isset($in_changes->force_retemplate)) {
+            if($in_changes->force_retemplate == 1) {
+                $comp->force_retemplate = 1;
+            } else {
+                $comp->force_retemplate = 0;
+            }
         }
 
-        if(isset($in_changes->rename_on_install) && $in_changes->rename_on_install == 1) {
-            $comp->rename_on_install = 1;
-        } else {
-            $comp->rename_on_install = 0;
+        if(isset($in_changes->rename_on_install)) {
+            if($in_changes->rename_on_install == 1) {
+                $comp->rename_on_install = 1;
+            } else {
+                $comp->rename_on_install = 0;
+            }
         }
 
         if($comp->use_template == 1) {
@@ -1451,7 +1462,7 @@ class MTM  {
         }
 
         $computers = T_Computer::search('Repository_ID',$repo->ID);
-        $output = "Repository,Name,Serial Number,Client Identifier,Rename on Install,Window,Status(ro),Window Start(ro),Window Close(ro)\n";
+        $output = "Repository,Name,Serial Number,Client Identifier,Use Template,Force Retemplate,Rename on Install,Window,Status(ro),Window Start(ro),Window Close(ro),Delete\n";
 
         foreach($computers as $computer) {
             $output .= join(',',
@@ -1459,11 +1470,14 @@ class MTM  {
             $computer->name,
             $computer->identifier,
             $computer->forced_clientidentifier,
+            $computer->use_template,
+            $computer->force_retemplate,
             $computer->rename_on_install,
             0,
             $computer->status,
             $computer->window_start_date,
-            $computer->window_close_date])."\n";
+            $computer->window_close_date,
+            0])."\n";
         }
 
         return $output;
@@ -1471,7 +1485,11 @@ class MTM  {
     }
 
     private function _combine_array(&$row, $key, $header) {
-        $row = array_combine($header, $row);
+        if(count($row) == count($header)) {
+            $row = array_combine($header, $row);
+        } else {
+            $row = false;
+        }
     }
 
     public function load_csv_for_repository($params,$in_user = 'root') {
@@ -1492,6 +1510,8 @@ class MTM  {
 
         array_walk($csvin, array($this,'_combine_array'), $header);
 
+        $mt = new Manifest_Template;
+
         // Make a hash of all repos we see, so we can quickly get repo objects.
         $editable_repos = $this->get_repositories_editable_for_user($in_user,MTM::FLAGS_RAW);
         $seen_repos = [];
@@ -1504,12 +1524,26 @@ class MTM  {
         $add_comps = [];
         $mod_comps = [];
 
+        // Since these should be unique, if they're not bomb before
+        // trying to load anything.
+        $seen_names = [];
+        $seen_ids = [];
         // Decide if each computer is an add or is a modify.
         foreach($csvin as $row) {
             if($row == false) {
                 continue;
             }
             $computers = T_Computer::search('identifier',$row['Serial Number']);
+            if(isset($seen_ids[$row['Serial Number']])) {
+                throw new exception("CSV: Multiple lines contain serial number ".$row['Serial Number']);
+            }
+            $seen_ids[$row['Serial Number']] = 1;
+
+            if(isset($seen_names[$row['Name']])) {
+                throw new exception("CSV: Multiple lines contain name ".$row['Name']);
+            }
+            $seen_names[$row['Name']] = 1;
+
             if(count($computers)==0) {
                 if($in_user !== 'root' && !isset($seen_repos[$row['Repository']])) {
                     throw new exception("You don't have permissions in this repository: '".$row['Repository']."'");
@@ -1545,6 +1579,7 @@ class MTM  {
         // rename=1 for setting rename_on_install
         // clientid=1 for forcing a client_identifier
         // repository=1 for changing repositories.
+        // delete=1 for deleting rows that match
         // Note that the key is _always_ the identifier and cannot be changed.
 
         // Check for adds
@@ -1552,8 +1587,9 @@ class MTM  {
             if(!in_array('Name',$header) ||
             !in_array('Window',$header) ||
             !in_array('Client Identifier',$header) ||
-            !in_array('Rename on Install',$header)) {
-                throw new exception("load_csv_for_repository: For adds, CSV MUST have columns: 'Repository','Name','Serial Number','Window','Client Identifier','Rename on Install'");
+            !in_array('Rename on Install',$header) ||
+            !in_array('Use Template',$header)) {
+                throw new exception("load_csv_for_repository: For adds, CSV MUST have columns: 'Repository','Name','Serial Number','Window','Client Identifier','Use Template','Rename on Install'");
             }
 
             foreach($add_comps as $addit) {
@@ -1567,11 +1603,35 @@ class MTM  {
                 if(count($checknames)!=0) {
                     throw new exception("load_csv_for_repository: Name '".$addit['Name']."' already in use in repository.");
                 }
+
                 if($addit['Rename on Install'] !== '0' &&
                 $addit['Rename on Install'] !== '' &&
                 $addit['Rename on Install'] !== '1') {
                     throw new exception("load_csv_for_repository: Rename on Install must be '0' (or blank) or '1' for '".$addit['Serial Number']."'");
                 }
+
+                if($addit['Use Template'] !== '0' &&
+                $addit['Use Template'] !== '' &&
+                $addit['Use Template'] !== '1') {
+                    throw new exception("load_csv_for_repository: Use Template must be '0' (or blank) or '1' for '".$addit['Serial Number']."'");
+                } else {
+                    try {
+                        if(!($mt->verify_template_for_repo($addit['Client Identifier'],$addit['Repository']))) {
+                            throw new excpetion("load_csv_for_repository(ad): template not found for ".$addit['Serial Number']." '".$addit['Client Identifier']."'");
+                        }
+                    } catch (exception $e) {
+                        throw new excpetion("load_csv_for_repository(ade): template not found for ".$addit['Serial Number']." '".$addit['Client Identifier']."'");
+                    }
+
+                }
+
+                if(isset($addit['Force Retemplate']) &&
+                $addit['Force Template'] !== '0' &&
+                $addit['Force Template'] !== '' &&
+                $addit['Force Retemplate'] !== '1') {
+                    throw new exception("load_csv_for_repository: Force Retemplate, if set, must be '0' (or blank) or '1' for '".$addit['Serial Number']."'");
+                }
+
             }
         }
         $do_name = 0;
@@ -1603,7 +1663,7 @@ class MTM  {
             if(!in_array('Client Identifier',$header)) {
                 throw new exception("load_csv_for_repository: Can't modify client identifier without 'Client Identifier' column");
             }
-            $do_clientid = 1;
+            $do_clientid = 1;            
         }
 
         $do_repository = 0;
@@ -1611,6 +1671,82 @@ class MTM  {
             $do_repository = 1;
         }
 
+
+        $do_template = 0;
+        if(isset($params['template']) && $params['template'] == 1) {
+            if(!in_array('Use Template',$header)) {
+                throw new exception("load_csv_for_repository: Can't modify use templates flag without 'Use Template' column");
+            }
+            $do_template = 1;
+            $documentit = '';
+            foreach($mod_comps as $modit) {
+                if($modit['csv']['Use Template'] == 1) {
+                    $check_clientid = '';
+                    if($do_clientid) {
+                        $check_clientid = $modit['csv']['Client Identifier'];
+                    } else {
+                        $check_clientid = $modit['computer']->forced_clientidentifier;
+                    }
+                    $check_repository = '';
+                    if($do_repository) {
+                        $check_repository = $modit['csv']['Repository'];
+                    } else {
+                        $check_repository = $repos_by_id[$modit['computer']->Repository_ID]['fullpath'];
+                    }
+                    try {
+                        if(!($mt->verify_template_for_repo($check_clientid,$check_repository))) {
+                            throw new exception("load_csv_for_repository(ut): template not found for ".$modit['csv']['Serial Number']." '".$modit['csv']['Client Identifier']."'");
+                        }
+                    } catch (exception $e) {
+                        throw new exception("load_csv_for_repository(ute): template error: ".$e->getMessage());
+                    }
+                }
+            }
+        }
+
+        $do_retemplate = 0;
+        if(isset($params['retemplate']) && $params['retemplate'] == 1) {
+            if(!in_array('Force Retemplate',$header)) {
+                throw new exception("load_csv_for_repository: Can't modify force retemplate flag without 'Force Retemplate' column");
+            }
+            $do_retemplate = 1;
+            // Double-check that each template is valid if templating is to be done.
+            foreach($mod_comps as $modit)  {
+                if($modit['csv']['Force Retemplate'] == 1 &&
+                ( ($do_template == 1 && $modit['csv']['Use Template'] == 1) ||
+                ($do_template == 0 && $modit['computer']->use_template == 1)) ) {
+                    $check_clientid = '';
+                    if($do_clientid == 1) {
+                        $check_clientid = $modit['csv']['Client Identifier'];
+                    } else {
+                        $check_clientid = $modit['computer']->forced_clientidentifier;
+                    }
+                    $check_repository = '';
+                    if($do_repository == 1) {
+                        $check_repository = $modit['csv']['Repository'];
+                    } else {
+                        $check_repository = $repos_by_id[$modit['computer']->Repository_ID + 0]['fullpath'];
+                    }
+                    try {
+                        if(!($mt->verify_template_for_repo($check_clientid,$check_repository))) {
+                            throw new exception("load_csv_for_repository(ft): template not found for ".$modit['csv']['Serial Number']." '".$modit['csv']['Client Identifier']."'");
+                        }
+                    } catch (exception $e) {
+                        throw new exception("load_csv_for_repository(fte): ".$e->getMessage());
+                    }
+                }
+
+            }
+
+        }
+
+        $do_deletes = 0;
+        if(isset($params['delete']) && $params['delete'] == 1) {
+            if(!in_array('Delete',$header)) {
+                throw new exception("load_csv_for_repository: Can't delete clients without 'Delete' column");
+            }
+            $do_deletes = 1;
+        }            
 
         //***********
         // Done with all the checks, now let's process the adds.
@@ -1621,6 +1757,7 @@ class MTM  {
             $args['name'] = $addit['Name'];
             $args['repository_id'] = $seen_repos[$addit['Repository']]['raw']->ID;
             $args['identifier'] = $addit['Serial Number'];
+            $args['use_template'] = $addit['Use Template'];
             $args['window'] = $addit['Window'];
             if($addit['Client Identifier']!=='') {
                 $args['forced_clientidentifier'] = $addit['Client Identifier'];
@@ -1628,19 +1765,23 @@ class MTM  {
             if($addit['Rename on Install'] !=='') {
                 $args['rename_on_install'] = $addit['Rename on Install'];
             }
-            ob_start();
-            var_dump($args);
-            $debug = ob_get_clean();
-            file_put_contents("/var/storage/phpsessions/additargs",$debug);
+            if($addit['Force Retemplate'] !== '') {
+                $args['force_retemplate'] = $addit['Force Retemplate'];
+            }
+            //ob_start();
+            //var_dump($args);
+            //$debug = ob_get_clean();
+            //file_put_contents("/var/storage/phpsessions/additargs",$debug);
             $this->add_computer($args,$in_user);
         }
 
         foreach($mod_comps as $modit) {
             $needsave = 0;
+            $changes = new \stdClass();
             if($do_name == 1 && $modit['csv']['Name'] !== $modit['computer']->name) {
-                $modit['computer']->name = $modit['csv']['Name'];
+                $changes->name = $modit['csv']['Name'];                
                 $needsave = 1;
-            }                
+            }
 
             if($do_window == 1 && $modit['csv']['Window']>0) {
                 // We can skip permissions, as we've already checked.
@@ -1648,27 +1789,39 @@ class MTM  {
             }
 
             if($do_rename == 1 && $modit['csv']['Rename on Install'] != $modit['computer']->rename_on_install) {
-                $modit['computer']->rename_on_install = $modit['csv']['Rename on Install'];
+                $changes->rename_on_install = $modit['csv']['Rename on Install'];
                 $needsave = 1;
             }
 
             if($do_clientid == 1 && $modit['csv']['Client Identifier'] != $modit['computer']->forced_clientidentifier) {
-                $modit['computer']->forced_clientidentifier = $modit['csv']['Client Identifier'];
+                $changes->forced_clientidentifier = $modit['csv']['Client Identifier'];
                 $needsave = 1;
             }            
+
+            if($do_template == 1 && $modit['csv']['Use Template'] != $modit['computer']->use_template) {
+                $changes->use_template = $modit['csv']['Use Template'];
+                $needsave = 1;
+            }
+
+            if($do_retemplate == 1 && $modit['csv']['Force Retemplate'] != $modit['computer']->force_retemplate) {
+                $changes->force_retemplate = $modit['csv']['Force Retemplate'];
+                $needsave = 1;
+            }
 
             if($do_repository == 1 && $seen_repos[$modit['csv']['Repository']]['raw']->ID != $modit['computer']->Repository_ID) {
-                $modit['computer']->Repository_ID = $seen_repos[$modit['csv']['Repository']]['raw'];
+                $changes->fullpath = $modit['csv']['Repository'];
                 $needsave = 1;
-            }            
+            }
 
             if($needsave != 0) {
-                $modit['computer']->save();
+                ob_start();
+                var_dump($changes);
+                $print = ob_get_clean();
+                file_put_contents("/var/storage/phpsessions/csvchanges",$print);
+                $this->update_computer_info($modit['computer']->ID,$in_user,$changes);
             }
 
         }
-
-
         return 0;
     }
 

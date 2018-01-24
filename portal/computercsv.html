@@ -49,11 +49,26 @@
 </div>
 <div class="checkbox">
     <label>
-        <input type="checkbox" ng-model="clientid" /> Client Identifier: Process Client_Identifier to match CSV
+        <input type="checkbox" ng-model="clientid" /> Client Identifier: Process Client_Identifier (also template identifier) to match CSV
+    </label>
+</div>
+<div class="checkbox">
+    <label>
+        <input type="checkbox" ng-model="template" /> Use Template: Update the use_template flag to match CSV
+    </label>
+</div>
+<div class="checkbox">
+    <label>
+        <input type="checkbox" ng-model="retemplate" /> Force Retemplate: Recopy the templates set in the CSV
     </label>
 </div>
 <div class="checkbox">
     <label>
         <input type="checkbox" ng-model="repository" /> Repository: Move computers to match CSV repository
+    </label>
+</div>
+<div class="checkbox">
+    <label>
+        <input type="checkbox" ng-model="DELETE" /> DELETE: Delete marked entries entirely!
     </label>
 </div>
