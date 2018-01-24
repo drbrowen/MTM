@@ -10,7 +10,9 @@ class MTM  {
     
     private static $mdh = '0';
     private $gconf;
-    
+    private $AdminGroupID;
+    private $userid_cache;
+
     // Constructor opens connection to the database.
     public function __construct() {
         $gconf = new ReadConfig('/etc/makemunki/config');
@@ -27,6 +29,14 @@ class MTM  {
             MTM::$mdh = new MunkiCert($params);
         }
         date_default_timezone_set($gconf->main->timezone);
+
+        $gid = T_UserGroup::search('name',$gconf->portal->admingroup);
+        if(count($gid)==1) {
+            $this->AdminGroupID = $gid[0]->ID;
+        } else {
+            $this->AdminGroupID = -1;
+        }
+
     }
 
     public function get_globals() {
@@ -503,6 +513,21 @@ class MTM  {
             throw new exception("I don't know what permission you're looking for.");
         }
 
+        if(!isset($this->userid_cache[$in_user])) {
+            $uid = T_User::search('name',$in_user);
+            if(count($uid)==1) {
+                $this->userid_cache[$in_user] = $uid[0]->ID;
+            } else {
+                return false;
+            }
+        }
+
+        // If the user is in this usergroup ID, then they are a full admin and have permissions.
+        $inadmin = T_User_in_UserGroup::search(['User_ID','UserGroup_ID'],[$this->userid_cache[$in_user],$this->AdminGroupID],['=','=']);
+        if(count($inadmin)>0) {
+            return true;
+        }
+
         $perms = V_UserPermission::Search(['User_name','Repository_fullpath'],[$in_user,$in_path],['=','=']);
 
         // figure out if we're looking for portal or repository permissions.
@@ -531,6 +556,21 @@ class MTM  {
         if($in_type !== 'P' && $in_type !== 'R') {
             throw new exception("I don't know what permission you're looking for.");
         }
+        if(!isset($this->userid_cache[$in_user])) {
+            $uid = T_User::search('name',$in_user);
+            if(count($uid)==1) {
+                $this->userid_cache[$in_user] = $uid[0]->ID;
+            } else {
+                return false;
+            }
+        }
+
+        // If the user is in this usergroup ID, then they are a full admin and have permissions.
+        $inadmin = T_User_in_UserGroup::search(['User_ID','UserGroup_ID'],[$this->userid_cache[$in_user],$this->AdminGroupID],['=','=']);
+        if(count($inadmin)>0) {
+            return true;
+        }
+
         $comps = T_Computer::Search('ID',$in_computerID);
         if(count($comps)!=1) {
             return false;
@@ -1082,6 +1122,21 @@ class MTM  {
     public function check_user_perm_for_usergroup($in_user,$in_usergroup_id,$in_type,$in_perm) {
         if($in_type !== 'P') {
             throw new exception("I don't know what permission you're looking for.");
+        }
+
+        if(!isset($this->userid_cache[$in_user])) {
+            $uid = T_User::search('name',$in_user);
+            if(count($uid)==1) {
+                $this->userid_cache[$in_user] = $uid[0]->ID;
+            } else {
+                return false;
+            }
+        }
+
+        // If the user is in this usergroup ID, then they are a full admin and have permissions.
+        $inadmin = T_User_in_UserGroup::search(['User_ID','UserGroup_ID'],[$this->userid_cache[$in_user],$this->AdminGroupID],['=','=']);
+        if(count($inadmin)>0) {
+            return true;
         }
 
         $perms = V_User_has_UserGroup_Permission::search(['User_name','Target_UserGroup_ID'],[$in_user,$in_usergroup_id],['=','=']);
