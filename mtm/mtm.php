@@ -55,7 +55,7 @@ class MTM  {
             }
             
             $startwindow = date_timestamp_get(date_create($comp->window_start_date));
-            $endwindow = date_timestamp_get(date_create($comp->window_end_date));
+            $endwindow = date_timestamp_get(date_create($comp->window_close_date));
             $now = time();
 
             if( ($now - $startwindow) < 0 || ($endwindow - $now)  < 0) {
