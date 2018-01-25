@@ -19,7 +19,7 @@
         <key>PendingUpdateCount</key>
         <integer>0</integer>
         <key>SoftwareRepoURL</key>
-        <string>https://munki.eps.uillinois.edu/ONBOARD</string>
+        <string>https://munkidev.eps.uillinois.edu/ONBOARD</string>
 </dict>
 </plist>
 
