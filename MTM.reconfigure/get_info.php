@@ -27,7 +27,6 @@ if($computers[0]['use_template'] == 1) {
 }
 print 'rename: '.$computers[0]['rename_on_install']."\n";
 print 'name: '.$computers[0]['name']."\n";
-print 'installappleupdates: '.$computers[0]['install_apple_updates']."\n";
 } catch (exception $e) {
     print "ERROR: ".$e->getMessage()."\n";
 }
