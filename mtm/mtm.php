@@ -188,10 +188,10 @@ class MTM  {
     public function update_computer_info($in_ID,$in_user = 'root',$in_changes) {
         $computers = T_Computer::Search('ID',$in_ID);
 
-        ob_start();
-        var_dump($in_changes);
-        $print = ob_get_clean();
-        file_put_contents("/var/storage/phpsessions/update_computer_info",$print);
+        #ob_start();
+        #var_dump($in_changes);
+        #$print = ob_get_clean();
+        #file_put_contents("/var/storage/phpsessions/update_computer_info",$print);
         
         if(count($computers) != 1) {
             throw new exception("update_computer: can't find computer");
@@ -465,33 +465,92 @@ class MTM  {
     public function get_repositories_for_user($in_user) {
         $perms = V_UserPermission::Search('User_name',$in_user);
         $ret = [];
-        foreach($perms as $perm) {
-            if(ereg('V',$this->_unpack_portal_permission($perm->portal_permission))) {
-                $tmp = $this->repository_by_id($perm->Repository_ID);
-                $tmp['portal_permission'] = $this->_unpack_portal_permission($perm->portal_permission);
-                $tmp['portal_permbits'] = $this->_unpack_portal_permbits($perm->portal_permission);
-                $tmp['repository_permission'] = $this->_unpack_portal_permission($perm->repository_permission);
-                $tmp['repository_permbits'] = $this->_unpack_portal_permbits($perm->repository_permission);
+
+        if(!isset($this->userid_cache[$in_user])) {
+            $uid = T_User::search('name',$in_user);
+            if(count($uid)==1) {
+                $this->userid_cache[$in_user] = $uid[0]->ID;
+            } else {
+                return [];
+            }
+        }
+
+        // If the user is in this usergroup ID, then they are a full admin and have permissions.
+        $inadmin = T_User_in_UserGroup::search(['User_ID','UserGroup_ID'],[$this->userid_cache[$in_user],$this->AdminGroupID],['=','=']);
+        if(count($inadmin)>0) {
+            $foundperm = [];
+
+            foreach($perms as $perm) {
+                $foundperm[$perm->Repository_ID] = $perm;
+            }
+
+            $repos = T_Repository::search('ID',0,'>=');
+            foreach($repos as $repo) {
+                $tmp = $this->repository_by_id($repo->ID);
+                if(isset($foundperm[$repo->ID])) {
+                    $tmp['portal_permission'] = $this->_unpack_portal_permission($foundperm[$repo->ID]->portal_permission);
+                    $tmp['portal_permbits'] = $this->_unpack_portal_permbits($foundperm[$repo->ID]->portal_permission);
+                    $tmp['repository_permission'] = $this->_unpack_repository_permission($foundperm[$repo->ID]->repository_permission);
+                    $tmp['repository_permbits'] = $this->_unpack_repository_permbits($foundperm[$repo->ID]->repository_permission);
+                } else {
+                    $tmp['portal_permission'] = $this->_unpack_portal_permission(0);
+                    $tmp['portal_permbits'] = $this->_unpack_portal_permbits(0);
+                    $tmp['repository_permission'] = $this->_unpack_repository_permission(0);
+                    $tmp['repository_permbits'] = $this->_unpack_repository_permbits(0);
+                }
                 $ret[] = $tmp;
+            }
+        } else {
+            foreach($perms as $perm) {
+                if(ereg('V',$this->_unpack_portal_permission($perm->portal_permission))) {
+                    $tmp = $this->repository_by_id($perm->Repository_ID);
+                    $tmp['portal_permission'] = $this->_unpack_portal_permission($perm->portal_permission);
+                    $tmp['portal_permbits'] = $this->_unpack_portal_permbits($perm->portal_permission);
+                    $tmp['repository_permission'] = $this->_unpack_repository_permission($perm->repository_permission);
+                    $tmp['repository_permbits'] = $this->_unpack_repository_permbits($perm->repository_permission);
+                    $ret[] = $tmp;
+                }
             }
         }
         return $ret;
+
     }
 
     public function get_repositories_editable_for_user($in_user,$in_flags = 0) {
-        $perms = V_UserPermission::Search('User_name',$in_user);
-        $ret = [];
-        foreach($perms as $perm) {
-            if(ereg('G',$this->_unpack_portal_permission($perm->portal_permission))) {
-                $tmp = [];
-                $ret[] = $this->repository_by_id($perm->Repository_ID,$in_flags);
+        if(!isset($this->userid_cache[$in_user])) {
+            $uid = T_User::search('name',$in_user);
+            if(count($uid)==1) {
+                $this->userid_cache[$in_user] = $uid[0]->ID;
+            } else {
+                return [];
             }
         }
+
+        $ret = [];
+
+        // If the user is in this usergroup ID, then they are a full admin and have permissions.
+        $inadmin = T_User_in_UserGroup::search(['User_ID','UserGroup_ID'],[$this->userid_cache[$in_user],$this->AdminGroupID],['=','=']);
+        if(count($inadmin)>0) {
+            $repos = T_Repository::search('ID',0,'>=');
+            foreach ($repos as $repo) {
+                $ret[] = $this->repository_by_id($repo->ID,$in_flags);
+            }
+
+        } else {
+            $perms = V_UserPermission::search('User_name',$in_user);
+
+            foreach($perms as $perm) {
+                if(ereg('G',$this->_unpack_portal_permission($perm->portal_permission))) {
+                    $ret[] = $this->repository_by_id($perm->Repository_ID,$in_flags);
+                }
+            }
+        }
+
         return $ret;
     }
 
     public function repository_by_id($in_ID,$in_flags = 0) {
-        $repos = T_Repository::Search('ID',$in_ID);
+        $repos = T_Repository::search('ID',$in_ID);
         if(count($repos)!=1) {
             throw new exception("Cannot find a computer repo");
         }
@@ -1099,15 +1158,28 @@ class MTM  {
 
     public function get_usergroups_for_user($in_user,$in_flags = 0) {
         $users = T_User::search('name',$in_user);
-        if(count($users)!=1) {
-            throw new exception("get_usergroups_for_user: Cannot find user");
+        if(!isset($this->userid_cache[$in_user])) {
+            $uid = T_User::search('name',$in_user);
+            if(count($uid)==1) {
+                $this->userid_cache[$in_user] = $uid[0]->ID;
+            } else {
+                throw new exception("get_usergroups_for_user: Cannot find user");
+            }
         }
-        $usergroupids = T_User_in_UserGroup::search('User_ID',$users[0]->ID);
+
+        // If the user is in this usergroup ID, then they are a full admin and have permissions.
+        $inadmin = T_User_in_UserGroup::search(['User_ID','UserGroup_ID'],[$this->userid_cache[$in_user],$this->AdminGroupID],['=','=']);
+
         $retraw = [];
-        foreach($usergroupids as $ugid) {
-            $ugroups = T_UserGroup::search('ID',$ugid->UserGroup_ID);
-            if(count($ugroups) == 1) {
-                $retraw[] = $ugroups[0];
+        if(count($inadmin)>0) {
+            $retraw = T_UserGroup::search('ID',0,'>=');
+        } else {
+            $usergroupids = T_User_in_UserGroup::search('User_ID',$users[0]->ID);
+            foreach($usergroupids as $ugid) {
+                $ugroups = T_UserGroup::search('ID',$ugid->UserGroup_ID);
+                if(count($ugroups) == 1) {
+                    $retraw[] = $ugroups[0];
+                }
             }
         }
 
@@ -1878,10 +1950,10 @@ class MTM  {
             }
 
             if($needsave != 0) {
-                ob_start();
-                var_dump($changes);
-                $print = ob_get_clean();
-                file_put_contents("/var/storage/phpsessions/csvchanges",$print);
+                #ob_start();
+                #var_dump($changes);
+                #$print = ob_get_clean();
+                #file_put_contents("/var/storage/phpsessions/csvchanges",$print);
                 $this->update_computer_info($modit['computer']->ID,$in_user,$changes);
             }
 
