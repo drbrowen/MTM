@@ -7,6 +7,7 @@ include_once 'manifest_template.php';
 class MTM  {
     const FLAGS_RAW = 1;
     const FLAGS_REPO_PATH = 2;
+    const FLAGS_NO_ADMIN = 4;
     
     private static $mdh = '0';
     private $gconf;
@@ -501,15 +502,27 @@ class MTM  {
                 $ret[] = $tmp;
             }
         } else {
+            $seenit = [];
             foreach($perms as $perm) {
-                if(ereg('V',$this->_unpack_portal_permission($perm->portal_permission))) {
-                    $tmp = $this->repository_by_id($perm->Repository_ID);
-                    $tmp['portal_permission'] = $this->_unpack_portal_permission($perm->portal_permission);
-                    $tmp['portal_permbits'] = $this->_unpack_portal_permbits($perm->portal_permission);
-                    $tmp['repository_permission'] = $this->_unpack_repository_permission($perm->repository_permission);
-                    $tmp['repository_permbits'] = $this->_unpack_repository_permbits($perm->repository_permission);
-                    $ret[] = $tmp;
+                if(isset($seenit[$perm->Repository_ID])) {
+                    $seenit[$perm->Repository_ID]['portal_permission'] |= $perm->portal_permission;
+                    $seenit[$perm->Repository_ID]['repository_permission'] |= $perm->repository_permission;
+                } else {
+                    $seenit[$perm->Repository_ID] = [];
+                    $seenit[$perm->Repository_ID]['portal_permission'] = $perm->portal_permission;
+                    $seenit[$perm->Repository_ID]['repository_permission'] = $perm->repository_permission;
                 }
+            }
+                    
+            foreach($seenit as $id => $perm) {
+                    $tmp = $this->repository_by_id($id);
+                    $tmp['portal_permission'] = $this->_unpack_portal_permission($perm['portal_permission']);
+                    $tmp['portal_permbits'] = $this->_unpack_portal_permbits($perm['portal_permission']);
+                    $tmp['repository_permission'] = $this->_unpack_repository_permission($perm['repository_permission']);
+                    $tmp['repository_permbits'] = $this->_unpack_repository_permbits($perm['repository_permission']);
+                    if(ereg('V',$tmp['portal_permission'])) {
+                        $ret[] = $tmp;
+                    }
             }
         }
         return $ret;
@@ -1171,7 +1184,7 @@ class MTM  {
         $inadmin = T_User_in_UserGroup::search(['User_ID','UserGroup_ID'],[$this->userid_cache[$in_user],$this->AdminGroupID],['=','=']);
 
         $retraw = [];
-        if(count($inadmin)>0) {
+        if(count($inadmin)>0 && !($in_flags & MTM::FLAGS_NO_ADMIN)) {
             $retraw = T_UserGroup::search('ID',0,'>=');
         } else {
             $usergroupids = T_User_in_UserGroup::search('User_ID',$users[0]->ID);

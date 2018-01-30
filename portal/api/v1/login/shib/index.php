@@ -37,7 +37,7 @@ if(isset($REMOTEUSER)) {
         // Get the users entry, or create one if one doesn't exist.
         $user_id = $mtm->add_user($REMOTEUSER,"Sync from Shibboleth");
 
-        $curgroups = $mtm->get_usergroups_for_user($REMOTEUSER);
+        $curgroups = $mtm->get_usergroups_for_user($REMOTEUSER,MTM::FLAGS_NO_ADMIN);
     } catch (exception $e) {
         print "Sorry, you are not logged in.";
         session_destroy();
@@ -77,21 +77,21 @@ if(isset($REMOTEUSER)) {
         exit(0);
     }        
 
-#    print "<pre>";
-#    var_dump($shib_user_groups);
-#    print "</pre>";
+    //print "<pre>";
+    //var_dump($shib_user_groups);
+    //print "</pre>";
     // Look for groups needing to be added
     foreach($shib_user_groups as $shib_user_group_ID => $shib_user_group) {
         $found = 0;
         foreach($curgroups as $curgroup) {
-#            print "Check for '".$shib_user_group_ID."' === '".$curgroup['id']."'\n";
+            //print "Check for '".$shib_user_group_ID."' === '".$curgroup['id']."'\n";
             if($curgroup['id'] == $shib_user_group_ID) {
                 $found = 1;
             }
         }
         if($found == 0) {
             $mtm->put_user_in_usergroup($user_id,$shib_user_group_ID);
-#           print "Added usergroup\n";
+           print "Added usergroup\n";
         }
     }
 
@@ -104,7 +104,7 @@ if(isset($REMOTEUSER)) {
             }
         }
         if($found == 0) {
-            $mtm->pull_user_from_usergroup($user_id,$curgroup['ID']);
+            $mtm->pull_user_from_usergroup($user_id,$curgroup['id']);
         }
     }
 
