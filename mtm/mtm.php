@@ -1652,7 +1652,7 @@ class MTM  {
                     continue;
                 }
                 if(!(is_numeric($addit['Window'])) || $addit['Window']<1) {
-                    throw new exception("load_csv_for_repository: Window '".$addit['Window']."' is not numeric for '".$addit['Serial Number']."'");
+                    throw new exception("load_csv_for_repository: Window '".$addit['Window']."' is not numeric or less than 1 for '".$addit['Serial Number']."'");
                 }
                 $checknames = T_Computer::Search(['name','Repository_ID'],[$addit['Name'],$seen_repos[$addit['Repository']]->ID],['=','=']);
                 if(count($checknames)!=0) {
@@ -1685,6 +1685,10 @@ class MTM  {
                 $addit['Force Template'] !== '' &&
                 $addit['Force Retemplate'] !== '1') {
                     throw new exception("load_csv_for_repository: Force Retemplate, if set, must be '0' (or blank) or '1' for '".$addit['Serial Number']."'");
+                }
+
+                if(isset($params['delete']) && $params['delete'] === '1' && isset($addit['Delete']) && $addit['Delete'] === '1' ){
+                    throw new exception("load_csv_for_repository: You can't delete a computer you are adding, serial number '".$addit['Serial Number']."'");
                 }
 
             }
@@ -1831,6 +1835,11 @@ class MTM  {
         }
 
         foreach($mod_comps as $modit) {
+            if($do_deletes == 1 && $modit['csv']['Delete'] === '1') {
+                $this->delete_computer($modit['computer']->ID,$in_user);
+                continue;
+            }
+
             $needsave = 0;
             $changes = new \stdClass();
             if($do_name == 1 && $modit['csv']['Name'] !== $modit['computer']->name) {
