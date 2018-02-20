@@ -204,6 +204,7 @@ app.controller("ComputerEditController",function($scope,$location,$routeParams,C
 	} else {
 	    $scope.showadd = 1;
 	    $scope.showedit = 0;
+	    $scope.form_use_template = true;
 	    Computer.queryrepo({},function(data){
 		$scope.repos = data;
 		if(angular.isDefined($routeParams.how) && $routeParams.how == 'new' && angular.isDefined($routeParams.id)) {
