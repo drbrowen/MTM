@@ -111,12 +111,12 @@ if(isset($REMOTEUSER)) {
     // Groups should be in sync now.  Send message.
 
     print "<html><head>";
-    //if(isset($_SESSION['referer'])) {
-    //    print "<meta http-equiv=\"refresh\" content=\"5; url=".$_SESSION['referer']."\">";
-    //}
+    if(isset($_SESSION['referer'])) {
+        print "<meta http-equiv=\"refresh\" content=\"0; url=".$_SESSION['referer']."\">";
+    }
     print "</head><body><p>You are logged in.</p>";
     if(isset($_SESSION['referer'])) {
-        print "<p><a href=\"".$_SESSION['referer']."\">Go here:".$_SESSION['referer']."</a></p>";
+        print "<p><a href=\"".$_SESSION['referer']."\">You should redirect here: ".$_SESSION['referer']."</a></p>";
     }
     print "</body></html>\n";
     exit();

@@ -37,3 +37,13 @@ h3 {font-size:16px;margin-bottom:2px;color:#4F4F4F;}
 .breadcrumb {margin-bottom:5px;background-color:#FFF;padding:8px 0;}
 .pagination {margin:0;}
 .help-block {font-size:12px;margin:2px 0 0 0;}
+
+.navbaruofi { background-color: #0E608D; border-color: red; padding: 0px 0px; border: 0px;  }
+
+/* Link */
+.navbar-default {
+  background-color: #0E608D;
+}
+
+.navbar-default .navbar-nav > .active > a { background-color: #0E608D; color:white; }
+.navbar-default .navbar-nav > .open > a { background-color: white; color:black; }

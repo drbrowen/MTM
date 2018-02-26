@@ -15,8 +15,7 @@ ComputerService.factory("Authentication",function($resource,$window,$q) {
 	var deferred = $q.defer();
 	Auth.get({},function(data){
 	    if(!angular.isDefined(data.status) || data.status.error == 0) {
-		console.log(data);
-		deferred.resolve("Log out " + data.user);
+		deferred.resolve(data.user + " Log Out");
 		loggedin = true;
 	    } else {
 		deferred.resolve("LOG IN");

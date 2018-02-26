@@ -14,6 +14,7 @@
         <script src="ComputerService.js"></script>
         <script src="GroupService.js"></script>
         <script src="LoginService.js"></script>
+	<script src="Menu.js"></script>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css"/>
         <link rel="stylesheet" href="mainstyle.css"/>
         <meta charset="utf-8">
@@ -24,6 +25,21 @@
             <div class="banner" role="banner">
                 <img alt="University of Illinois" src="uillinois-wordmark-large.png"/>
             </div>
+	    <div ng-controller="menuController">
+	      <div class="container">
+		<nav class="navbar navbar-default navbaruofi">
+		  <div class="container-fluid">
+		    <ul class="nav navbar-nav navbaruofi">
+		      <li class="active navbar-default navbaruofi" ng-repeat="navitem in navitems"><a class="navbaruofi" href="{{navitem.url}}">{{navitem.name}}</a></li>
+		    </ul>
+		    <ul class="nav navbar-nav navbar-right navbaruofi">
+		      <li class="active" ng-repeat="navitem in rnavitems"><a href="{{navitem.url}}">{{navitem.name}}</a></li>
+		      <li class="active"><a ng-click="loginout()">{{username}}</a></li>
+		    </ul>
+		  </div>
+		</nav>
+	      </div>
+	    </div>
             <div class="container">
                 <div id="app-content" role="main">
                     <!--<a href="/Portal/#/">Home</a>-->
