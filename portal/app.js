@@ -17,6 +17,9 @@ app.config(function($routeProvider,$locationProvider) {
 	    redirectTo:'/computers/search'
 	})
 
+	.when('/downloads', {
+	    templateUrl:'downloads.html'
+	})
 
 	.when('/computers/edit/:how?/:id?', {
 	    templateUrl:'computeredit.html',

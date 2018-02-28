@@ -33,14 +33,14 @@
     <div class="form-group">
         <label class="col-sm-2 control-label">Name*</label>
         <div class="col-sm-5">
-            <input class="form-control" type="text" ng-model="form_name" ng-required="1" />
+            <input class="form-control" type="text" ng-model="form_name" ng-required="1" placeholder="Computer's unique name. Typically hostname or serial number."/>
         </div>
     </div>
 
     <div class="form-group">
         <label class="col-sm-2 control-label">Serial Number*</label>
         <div class="col-sm-5">
-            <input class="form-control" type="text" ng-model="form_identifier" ng-required="1" />
+            <input class="form-control" type="text" ng-model="form_identifier" ng-required="1" placeholder="Computer's serial number. Must be CAPITALIZED."/>
         </div>
     </div>
 
@@ -54,7 +54,7 @@
     <div class="form-group">
         <label class="col-sm-2 control-label">Window (Minutes)*</label>
         <div class="col-sm-5">
-            <input class="form-control" type="text" ng-model="form_window" ng-required="showadd" />
+            <input class="form-control" type="text" ng-model="form_window" ng-required="showadd" placeholder="'1440' = 1 day; '10080' = 1 week; '43800' = 1 month"/>
         </div>
     </div>
 
