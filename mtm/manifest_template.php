@@ -25,7 +25,7 @@ class Manifest_Template {
         $ret = [];
         $i = 0;
         foreach($files as $file) {
-            if(substr($file,0,2) === '._') {
+            if(substr($file,0,1) === '.' ) {
                 continue;
             }                
             $tmp = [];
