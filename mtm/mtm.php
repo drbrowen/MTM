@@ -1502,7 +1502,7 @@ class MTM  {
         }
         $makegroup = $this->add_repository($in_params,$in_user,MTM::FLAGS_RAW);
         $changes['repository_id'] = $makegroup[0]['raw']->ID;
-        $changes['portal_permission'] = 'VCGS';
+        $changes['portal_permission'] = 'VCG-';
         $changes['repository_permission'] = 'RW';
 
         $this->change_repository_permission_for_usergroup($mugs[0]->ID,'root',$changes);
