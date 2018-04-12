@@ -27,12 +27,28 @@ for line in f:
 f.close()
 
 if params['rename'] == '1':
-      compname = subprocess.check_output(['scutil','--get','ComputerName']).strip('\n')
-      lhostname = subprocess.check_output(['scutil','--get','LocalHostName']).strip('\n')
+      try:
+            compname = subprocess.check_output(['scutil','--get','ComputerName']).strip('\n')
+      except:
+            compname = ''
+
+      try:
+            lhostname = subprocess.check_output(['scutil','--get','LocalHostName']).strip('\n')
+      except:
+            lhostname = ''
+
+      try:
+            fullhostname = subprocess.check_output(['scutil','--get','HostName']).strip('\n')
+      except:
+            fullhostname = ''
+
       if compname != params['name']:
             res = subprocess.check_output(['scutil','--set','ComputerName',params['name']])
       if lhostname != params['name']:
             res = subprocess.check_output(['scutil','--set','LocalHostName',params['name']])
+
+      if fullhostname != params['name']:
+            res = subprocess.check_output(['scutil','--set','HostName',params['name']])
 
 
 if munkicommon.pref('ClientIdentifier') != params['clientidentifier']:
