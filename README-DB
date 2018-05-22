@@ -1,0 +1,17 @@
+Notes for the database:
+
+The default max. connections for Mariadb is 100.  I upped this to 512.  In order to up it very much, you have to first increase the maximum allowed open files.  This is done by editing /etc/security/limits.conf and adding:
+
+*  soft nofile 65535
+*  hard nofile 65535
+
+Then logging out and back in.  The success can be checked by looking at 'ulimit -n' after logging out and in.
+
+Once this is done, edit /etc/my.cnf.d/server.conf and add
+
+max_connections = 512
+
+under [mysqld] and/or [mariadb].
+
+A restart is required for changes to take effect.
+
