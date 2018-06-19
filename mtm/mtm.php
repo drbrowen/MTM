@@ -1766,8 +1766,8 @@ class MTM  {
                 }
 
                 if(isset($addit['Force Retemplate']) &&
-                $addit['Force Template'] !== '0' &&
-                $addit['Force Template'] !== '' &&
+                $addit['Force Retemplate'] !== '0' &&
+                $addit['Force Retemplate'] !== '' &&
                 $addit['Force Retemplate'] !== '1') {
                     throw new exception("load_csv_for_repository: Force Retemplate, if set, must be '0' (or blank) or '1' for '".$addit['Serial Number']."'");
                 }
