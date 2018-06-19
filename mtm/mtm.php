@@ -1757,10 +1757,10 @@ class MTM  {
                 } else {
                     try {
                         if(!($mt->verify_template_for_repo($addit['Client Identifier'],$addit['Repository']))) {
-                            throw new excpetion("load_csv_for_repository(ad): template not found for ".$addit['Serial Number']." '".$addit['Client Identifier']."'");
+                            throw new exception("load_csv_for_repository(ad): template not found for ".$addit['Serial Number']." '".$addit['Client Identifier']."'");
                         }
                     } catch (exception $e) {
-                        throw new excpetion("load_csv_for_repository(ade): template not found for ".$addit['Serial Number']." '".$addit['Client Identifier']."'");
+                        throw new exception("load_csv_for_repository(ade): template not found for ".$addit['Serial Number']." '".$addit['Client Identifier']."'");
                     }
 
                 }
