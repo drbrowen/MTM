@@ -11,9 +11,7 @@ session_write_close();
 
 $url = $gconf->main->baseurl.'/Shibboleth.sso/Logout';
 
-if(isset($_SERVER["eppn"])) {
-    header('Location: '.$url);
-}
+header('Location: '.$url);
 
 print '<html><head><title>Log Out</title></head><body><p>Redirecting to <a href="'.$url.'">'.$url.'</a></body></html>';
 
