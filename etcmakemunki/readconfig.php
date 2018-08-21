@@ -3,7 +3,7 @@
 class ReadConfig {
 
     private $vars;
-    
+
     public function __construct($filename) {
         if(is_array($filename)) {
             $this->vars = $filename;
@@ -25,7 +25,13 @@ class ReadConfig {
     public function __get($key) {
         if(isset($this->vars[$key])) {
             if(is_array($this->vars[$key])) {
-                return new ReadConfig($this->vars[$key]);
+                $checks = array_keys($this->vars[$key]);
+                foreach($checks as $check) {
+                    if(!is_numeric($check)) {
+                        return new ReadConfig($this->vars[$key]);
+                    }
+                }
+                return $this->vars[$key];
             } else {
                 return $this->vars[$key];
             }

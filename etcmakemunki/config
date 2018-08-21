@@ -5,8 +5,9 @@ codehome = /home/someplace/mtm
 baseurl = https://munkibusiness.mydomain.edu
 fullrepopath = /var/www/repos
 urlrepobase = /repos
-mkpackagedir = /home/makemunki
-mkpackagesrc = /home/makemunki/munkiconfig-pack
+mkpackagedir = /home/makemunki/MTM/home
+mkpackagesrc = /home/makemunki/MTM/home/munkiconfig-pack
+mtmreconfigdir = /home/makemunki/MTM/MTM.reconfigure
 timezone = America/Chicago
 
 ; This section defines certificate authority configs
@@ -28,16 +29,21 @@ dbpass = munkipass
 backupdir = /var/storage/backupdir
 
 [portal]
+admingroup = SOMEadminGroup
 session_lifetime = 86400
 maximum_window = 20160 ; in minutes = 14 days
 
 [apache]
 per_repo_config = /etc/apache/conf/munki-conf-per-group
+davbase = /some/path/to/repos
+restart = sudo /sbin/service httpd reload
 
 [ldap]
-ldapuri = "ldaps://ad.uillinois.edu/"
-username = "munkiaccountwithprivilegesofsomekind@ad.uillinois.edu"
-password = "secret" ; see mtm/change_ldap_pass.php to change this password.
-basedn = "DC=ad,DC=uillinois,DC=edu"
-dnattribute = sAMAccountName
+name[] = UIUC
+
+UIUC[ldapuri] = "ldaps://ad.uillinois.edu/"
+UIUC[username] = "munkiaccountwithprivilegesofsomekind@ad.uillinois.edu"
+UIUC[password] = "secret" ; see mtm/change_ldap_pass.php to change this password.
+UIUC[basedn] = "DC=ad,DC=uillinois,DC=edu"
+UIUC[dnattribute] = sAMAccountName
 

@@ -90,11 +90,16 @@ ComputerService.factory("GroupPerms",function($resource,myErrorHandler) {
 			 interceptor: { responseError: myErrorHandler.doit}},
 
 	'adlookup': {method:'GET',
-			 url:"/api/v1/adgroups/samaccountname/:key",
+			 url:"/api/v1/adgroups/samaccountname/:ldapname/:key",
 			 isArray:false,
 			 transformResponse: function(data) {return myErrorHandler.format(data)},
 			 interceptor: { responseError: myErrorHandler.doit}},
 
+        'ldapname': {method:'GET',
+			 url:"/api/v1/adgroups/ldapnames",
+			 isArray:true,
+			 transformResponse: function(data) {return myErrorHandler.format(data)},
+			 interceptor: { responseError: myErrorHandler.doit}},
 
     });
 
@@ -467,8 +472,12 @@ app.controller("UserGroupEditController",function($scope,$routeParams,GroupPerms
 							      key:$routeParams.key},
 							     function(data){
 								 $scope.processshibgroupdata(data);});
+
+			      GroupPerms.ldapname({},function(data) {
+				  $scope.processldapnamedata(data);});
+
 			  });
-    
+
     var checklastresults = function() {
 	var theresults = GroupPerms.getlastresults();
 	if(angular.isDefined(theresults.status)) {
@@ -533,6 +542,19 @@ app.controller("UserGroupEditController",function($scope,$routeParams,GroupPerms
 	    $scope.shibgroups = data;
 	}
 	$scope.displayshibgroups = [] . concat ($scope.shibgroups);
+    }
+
+    $scope.processldapnamedata = function(data) {
+	console.log("ldapnames");
+	console.log(data);
+	if(data.length < 1) {
+	    $scope.goodldapnames = 0;
+	    $scope.ldapnames = [];
+	} else {
+	    $scope.goodldapnames = 1;
+	    $scope.ldapnames = data;
+	    $scope.form_ldapname = data[0];
+	}
     }
 
     $scope.setedit_repository = function(activeID) {
@@ -616,7 +638,7 @@ app.controller("UserGroupEditController",function($scope,$routeParams,GroupPerms
 	if(level == 2) {
 	    $scope.lookup_adgrouppath = "";
 	    $scope.lookup_shibgroup = "";
-	    GroupPerms.adlookup({key:$scope.newshibadgroup},
+	    GroupPerms.adlookup({key:$scope.newshibadgroup,ldapname:$scope.form_ldapname},
 				function(data) {
 				    if(angular.isDefined(data.distinguishedname)) {
 					$scope.goodadlookup = true;
@@ -626,7 +648,7 @@ app.controller("UserGroupEditController",function($scope,$routeParams,GroupPerms
 				});
 	}
 	if(level == 3) {
-	    GroupPerms.addusershibgroup({id:$routeParams.key,ad_path:$scope.lookup_adgrouppath},
+	    GroupPerms.addusershibgroup({id:$routeParams.key,ad_path:$scope.lookup_adgrouppath,ldapname:$scope.form_ldapname},
 					function(data) {
 					    if(angular.isDefined(data.status)) {
 						GroupPerms.setlastresults(data);
