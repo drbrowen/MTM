@@ -33,14 +33,15 @@
     <div class="form-group">
         <label class="col-sm-2 control-label">Name*</label>
         <div class="col-sm-5">
-            <input class="form-control" type="text" ng-model="form_name" ng-required="1" placeholder="Computer's unique name. Typically hostname or serial number."/>
+            <input class="form-control" type="text" ng-model="form_name" ng-required="1" placeholder="Computer's unique name. Typically hostname or serial number." ng-pattern="/^[a-zA-Z0-9\- ]*$/" />
+            <span class="help-block">No special characters allowed except for hyphens.</span>
         </div>
     </div>
 
     <div class="form-group">
         <label class="col-sm-2 control-label">Serial Number*</label>
         <div class="col-sm-5">
-            <input class="form-control" type="text" ng-model="form_identifier" ng-required="1" placeholder="Computer's serial number. Must be CAPITALIZED."/>
+            <input class="form-control" type="text" ng-model="form_identifier" ng-required="1" placeholder="Computer's serial number. Must be CAPITALIZED." ng-disabled="showedit" />
         </div>
     </div>
 

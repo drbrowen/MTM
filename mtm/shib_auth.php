@@ -209,17 +209,22 @@ class Shib_Auth {
         $adsize = count($adparts);
         $parts = explode(',',$in_adgroup);
         $size = count($parts);
-        $shib_group=$ldconfig->shib_group_base;
+        if($ldconfig->shib_full_path === 'Y') {
+            $shib_group=$ldconfig->shib_group_base;
         
-        for($i=1;$i <= $adsize; $i++) {
-            if($parts[$size-$i] !== $adparts[$adsize-$i]) {
-                throw new exception ("I can't figure out the group '$in_adgroup'.");
+            for($i=1;$i <= $adsize; $i++) {
+                if($parts[$size-$i] !== $adparts[$adsize-$i]) {
+                    throw new exception ("I can't figure out the group '$in_adgroup'.");
+                }
             }
-        }
 
-        for ($i=$size-$adsize-1;$i>=0;$i--) {
-            $subsections = explode("=",$parts[$i]);
-            $shib_group .= ':'.strtolower($subsections[1]);
+            for ($i=$size-$adsize-1;$i>=0;$i--) {
+                $subsections = explode("=",$parts[$i]);
+                $shib_group .= ':'.strtolower($subsections[1]);
+            }
+        } else {
+            $subsections = explode('=',$parts[0]);
+            $shib_group = str_replace(" ","_",$subsections[1]);
         }
         return $shib_group;
     }

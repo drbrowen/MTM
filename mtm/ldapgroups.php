@@ -26,11 +26,16 @@ class LdapGroups  {
                 throw new exception("You must set ldap ldapuri, basedn, username, and password for $name in config file.");
             }
             LdapGroups::$ldapconn[$name] = ldap_connect($gconf->ldap->$name->ldapuri);
+            ldap_set_option(LdapGroups::$ldapconn[$name],LDAP_OPT_PROTOCOL_VERSION,3);
             if(!isset(LdapGroups::$ldapconn[$name])) {
                 throw new exception("Can't connect to ldap server.");
             }
-            $bind = ldap_bind(LdapGroups::$ldapconn[$name],$gconf->ldap->$name->username,$ps->pass_from_cipher($gconf->ldap->$name->password));
-            if(!isset($bind)) { 
+            $pass_to_use = $ps->pass_from_cipher($gconf->ldap->$name->password);
+            if(!isset($pass_to_use) || $pass_to_use === '') {
+                throw new exception("Bind password not given for $name");
+            }
+            $bind = ldap_bind(LdapGroups::$ldapconn[$name],$gconf->ldap->$name->username,$pass_to_use);
+            if(!$bind) { 
                 throw new exception("Can't bind to LDAP server.");
             }
         }
@@ -47,6 +52,7 @@ class LdapGroups  {
     }
 
     public function group_info_from_samaccountname($in_group,$in_name) {
+        file_put_contents("/var/storage/phpsessions/samaccountname","$in_group and $in_name");
         if(!isset(LdapGroups::$gconf->ldap->$in_name,LdapGroups::$ldapconn[$in_name])) {
             throw new exception("No config for ldap name $in_name");
         }
