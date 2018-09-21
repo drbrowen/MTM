@@ -14,10 +14,10 @@ require "ldapgroups.php";
 $ldg = new LdapGroups;
 
 try {
-    $res = $ldg->group_info_from_samaccountname($argv[1]);
+    $res = $ldg->group_info_from_samaccountname($argv[1],$argv[2]);
     if($res['count']==1) {
         print "Found Entry: ".$res[0]['distinguishedname'][0]."\n";
     }
 } catch (exception $e) {
-    print "Error: ".$e->getMessage();
+    print "Error: ".$e->getMessage()."\n";
 }

@@ -27,7 +27,7 @@ class Shib_Auth {
     }
 
 // adds a Shib group to a UserGroup
-   public function add_shibgroup_to_usergroup($in_shibgroup_adpath, $in_usergroup_ID, $in_user = 'root') {
+    public function add_shibgroup_to_usergroup($in_shibgroup_adpath, $in_usergroup_ID, $in_ldap_name, $in_user = 'root') {
        $mtm = new MTM;
        // Several steps.
        // Determine if user has permission in usergroup.
@@ -52,7 +52,7 @@ class Shib_Auth {
        if(count($shgs) != 1) {
            $new_shg = new T_ShibGroup;
            $new_shg->ad_path = $norm_ad_path;
-           $new_shg->shib_path = $this->shib_group_from_ad($norm_ad_path);
+           $new_shg->shib_path = $this->shib_group_from_ad($norm_ad_path,$in_ldap_name);
            $new_shg->save();
            $shg = $new_shg;
        } else {
@@ -201,21 +201,30 @@ class Shib_Auth {
            
 
 // 
-   public function shib_group_from_ad($in_adgroup) {
+   public function shib_group_from_ad($in_adgroup,$in_ldapname) {
+        $lg = new LdapGroups;
+        
+        $ldconfig= $lg->ldap_config($in_ldapname);
+        $adparts = explode(',',$ldconfig->basedn);
+        $adsize = count($adparts);
         $parts = explode(',',$in_adgroup);
         $size = count($parts);
-        // Unhardcode these items.
-        $shib_group='urn:mace:uiuc.edu';
-        // unhardcode these items.
-        if($parts[$size-1] !== 'DC=edu'
-        || $parts[$size-2] !== 'DC=uillinois'
-        || $parts[$size-3] !== 'DC=ad') {
-            throw new exception ("I can't figure out the group '$in_adgroup'.");
-        }
+        if($ldconfig->shib_full_path === 'Y') {
+            $shib_group=$ldconfig->shib_group_base;
+        
+            for($i=1;$i <= $adsize; $i++) {
+                if($parts[$size-$i] !== $adparts[$adsize-$i]) {
+                    throw new exception ("I can't figure out the group '$in_adgroup'.");
+                }
+            }
 
-        for ($i=$size-4;$i>=0;$i--) {
-            $subsections = explode("=",$parts[$i]);
-            $shib_group .= ':'.strtolower($subsections[1]);
+            for ($i=$size-$adsize-1;$i>=0;$i--) {
+                $subsections = explode("=",$parts[$i]);
+                $shib_group .= ':'.strtolower($subsections[1]);
+            }
+        } else {
+            $subsections = explode('=',$parts[0]);
+            $shib_group = str_replace(" ","_",$subsections[1]);
         }
         return $shib_group;
     }
@@ -230,9 +239,9 @@ class Shib_Auth {
         return 0;
     }
 
-    public function get_ad_group_dn($in_group) {
+    public function get_ad_group_dn($in_group,$in_ldapname) {
         $lg = new LdapGroups;
-        $ress = $lg->group_info_from_samaccountname($in_group);
+        $ress = $lg->group_info_from_samaccountname($in_group,$in_ldapname);
 
         if($ress['count']!=1) {
             throw new exception("get_ad_group_dn: group not found or multiple groups found.");

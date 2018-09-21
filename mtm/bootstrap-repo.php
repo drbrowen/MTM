@@ -1,8 +1,8 @@
 #!/usr/bin/env php
 <?php
 
-if(!isset($argv[1])) {
-    throw new exception("You need to specify the samaccount name on the command line.");
+if(!isset($argv[1],$argv[2])) {
+    throw new exception("You need to specify the samaccount name and the LDAP name on the command line.");
 }
 
 require_once "/etc/makemunki/readconfig.php";
@@ -17,14 +17,16 @@ $mtm = new MTM;
 $ldg = new LdapGroups;
 $sa = new Shib_Auth;
 
+$names = $ldg->ldap_names();
+
 try {
-    $res = $ldg->group_info_from_samaccountname($argv[1]);
+    $res = $ldg->group_info_from_samaccountname($argv[1],$argv[2]);
     if($res['count']!=1) {
-        throw new exception("AD/LDAP group not found.  Try a different samaccount name");
+        throw new exception("AD/LDAP group not found.  Try a different samaccount name.");
     }
     $adgroup = $res[0]['distinguishedname'][0];
     print "Adding Master Group: ".$adgroup."\n";
-    $shibgroup = $sa->shib_group_from_ad($adgroup);
+    $shibgroup = $sa->shib_group_from_ad($adgroup,$argv[2]);
     print "Shib group: ".$shibgroup."\n";
 } catch (exception $e) {
     print "Error: ".$e->getMessage()."\n";

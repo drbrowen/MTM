@@ -540,10 +540,11 @@ class MyAPI extends API
                 try {
                     $shib_auth = new Shib_Auth;
                     if(!isset($invars->ad_path) ||
-                    !isset($invars->id)) {
+                    !isset($invars->id) ||
+                    !isset($invars->ldapname)) {
                         return ['status'=>['error'=>'1','text'=>'Not enough parameters to add shib group']];
                     }
-                    $shib_auth->add_shibgroup_to_usergroup($invars->ad_path,$invars->id,$_SESSION['user']);
+                    $shib_auth->add_shibgroup_to_usergroup($invars->ad_path,$invars->id,$invars->ldapname,$_SESSION['user']);
                     return ['status'=>['error'=>0,'text'=>'OK']];
                 }
                 catch (exception $e) {
@@ -652,16 +653,20 @@ class MyAPI extends API
                 if(!(isset($this->args[0]))) {
                     return ['status'=>['error'=>'1','text'=>'No group specified']];
                 }
-
                 try {
-                    $res = $shib_auth->get_ad_group_dn($this->args[0]);
-                    $sg = $shib_auth->shib_group_from_ad($res);
+                    $res = $shib_auth->get_ad_group_dn($this->args[1],$this->args[0]);
+                    $sg = $shib_auth->shib_group_from_ad($res,$this->args[0]);
                     return ['distinguishedname'=>$res,'shib_group'=>$sg];
                 }
                 catch (exception $e) {
                     return ['status'=>['error'=>1,'text'=>$e->getMessage()]];
                 }
                 break;
+
+            case 'ldapnames':
+                $lg = new LdapGroups;
+                $names = $lg->ldap_names();
+                return $names;
 
             default:
                 return ['status'=>['error'=>1,'text'=>'I do not understand the request']];

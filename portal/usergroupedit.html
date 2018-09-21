@@ -118,6 +118,8 @@
     </div>
     <input class="btn btn-primary" type="submit" ng-click="add_shibgroup(1)" value="Add Shib Group" />
     <div class="well" ng-show="showshibadd">
+        <p>AD name</p>
+        <select class="form-control" ng-model="form_ldapname" ng-options="ldapname as ldapname for ldapname in ldapnames track by ldapname"></select>
         <p>AD Group Name (Short name, like 'munki admins'):</p>
             <input type="text" name="shibadgroup" ng-model="newshibadgroup" length="160" />
             <input type="submit" value="Look up AD Group" ng-click="add_shibgroup(2)" />
@@ -144,7 +146,7 @@
             </tbody>
         </table>
         <dir-pagination-controls boundary-links="true" template-url="components/dirPagination.tpl.html"></dir-pagination-controls>
-        <div ng-show="!showshibdelete"><input class="btn btn-primary" type="submit" ng-click="enableshibdelete(1)" value="Enable Deletes"/></div><div ng-show="showshibdelete"><input class="btn btn-primary" type="submit" ng-click="enableshibdelete(0)" value="Cancel Deletes"/></div>
+        <div ng-show="!showshibdelete"><input class="btn btn-primary" type="submit" ng-click="enableshibdelete(1)" value="Enable Deletes"/></div><div ng-show="showshibdelete"><input class="btn btn-primary" type="submit" ng-click="enableshibdelete(0)" value="Disable Deletes"/></div>
     </div>
     
 </div>

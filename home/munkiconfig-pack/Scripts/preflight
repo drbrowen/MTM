@@ -1,0 +1,12 @@
+#!/bin/bash
+
+FILELIST='00_MTM.reconfigure 00_MTM.reconfigure-core 00_MTM.run_directory 00_MTM.reconfigure'
+for FILE in $FILELIST;do
+  if [ -f $FILE ]; then
+     rm $FILE
+  fi
+done
+
+if [ -L /usr/local/munki/preflight ]; then
+   rm /usr/local/munki/preflight
+fi
