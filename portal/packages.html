@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+    <script src="https://use.fontawesome.com/c35b7a4516.js"></script>
+	<style>
+		.card img {
+			width: 64px;
+			height: 64px;
+		}
+
+		.card {
+			min-height: 4em;
+            background-color: rgba(39, 232, 162, 0.2);
+		}
+
+        .hideit {
+            display: none;
+        }
+
+        .app-description {
+            background-color: rgba(232, 74, 39, 0.2);
+        }
+
+        .appinfo {
+            padding: 0em .5em .5em .5em;
+            cursor: pointer;
+        }
+
+	</style>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
+        <form class="form-inline my-2 my-lg-0">
+        <input id="search" class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
+        </form>
+        <span class="navbar-text float-right">Last updated <span id="lastupdated"></span></span>
+    </nav>
+
+    <div class="container-fluid">
+		<div id="apps"></div>
+    </div>
+
+    <!-- jQuery first, then Tether, then Bootstrap JS. -->
+	<script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.3.0/mustache.min.js" integrity="sha256-iaqfO5ue0VbSGcEiQn+OeXxnxAMK2+QgHXIDA5bWtGI=" crossorigin="anonymous"></script>
+
+    <!-- Some templates -->
+	<script id="template-apps-row" type="x-tmpl-mustache">
+			<div class="row mainrow">
+				{{#apps}}
+					{{>row}}
+				{{/apps}}
+			</div>
+	</script>
+
+	<script id="template-apps-app" type="x-tmpl-mustache">
+<div data-description="{{ description }}" data-tagname="{{search}}" class="col-12 col-sm-4 col-md-3 appinfo">
+		<div class="card">
+            <div class="card-body" aria-expanded="false" data-toggle="collapse" href="#card-{{ tagname }}">
+                <div class="row">
+                    <div class="col-8 col-md-10">
+                        <p class="h5">{{ name }}</p>
+                    </div>
+                    <div class="col-4 col-md-2">
+                        {{#icon}}
+                        <img style="width: 64px; height: 64px;" src="/portal/icons/{{icon}}" class="float-right"></img>
+                        {{/icon}}
+                        {{^icon}}
+                        <i class="text-muted fa fa-question-circle-o fa-4x float-right" aria-hidden="true"></i>
+                        {{/icon}}
+                    </div>
+                </div>
+            </div>
+
+            <div id="card-{{ tagname }}" class="card-body collapse app-description">
+                {{#description}}
+                <p>{{ description}}</p>
+                {{/description}}
+                {{^description}}
+                <p>No description</p>
+                {{/description}}
+			    <ul class="list-group list-group-flush">
+				    {{#versions}}
+                    <li class="list-group-item"><var>{{ version }}</var>
+                        <ul class="list-group">
+                        {{#catalogs}}
+                            <li class="list-group-item">{{.}}</li>
+                        {{/catalogs}}
+                        </ul>
+                    </li>
+                    {{/versions}}
+			    </ul>
+            </div>
+		</div>
+      </div>
+	</script>
+
+    <script>
+    $(function () {
+	  var all_apps = [];
+	  var apps_row = $('#template-apps-row').html();
+	  Mustache.parse(apps_row);
+
+	  var apps_app = $('#template-apps-app').html();
+	  Mustache.parse(apps_app);
+
+	  function filterApps() {
+        var whatfor = $("#search").val().toLowerCase();
+        if (!whatfor || whatfor == "description:") {
+            $("div.mainrow > div[data-tagname]").removeClass("hideit");
+        } else {
+            if (whatfor.startsWith("description:")) {
+                whatfor = whatfor.substr("description:".length);
+                $("div.mainrow > div:not([data-description*='" + whatfor + "'])").addClass("hideit");
+                $("div.mainrow > div[data-description*='" + whatfor + "']").removeClass("hideit");
+            } else {
+                $("div.mainrow > div:not([data-tagname*='" + whatfor + "'])").addClass("hideit");
+                $("div.mainrow > div[data-tagname*='" + whatfor + "']").removeClass("hideit");
+            }
+        }
+	  }
+
+      $.getJSON('packages.json', function (data) {
+		all_apps = data.sort((a,b) => a.name.localeCompare(b.name));
+        var pageinfoidx = all_apps.findIndex(app => app.name == "pageinfo");
+        var lastupdated = all_apps[pageinfoidx]['lastupdated'];
+        $('#lastupdated').html(lastupdated);
+        console.log(all_apps[pageinfoidx]);
+        all_apps.splice(pageinfoidx, 1);
+		all_apps.forEach(function(app) {
+			app.versions = app.versions.sort((a,b) => b.version.localeCompare(a.version));
+		});
+        all_apps.forEach(function(app) {
+            description = app.description || "fixme"; 
+            app.description = description.toLowerCase();
+            app.search = app.name.toLowerCase() + description;
+        });
+        $('#apps').html(Mustache.render(apps_row, {apps: all_apps}, {row: apps_app}));
+      	$('[data-toggle="popover"]').popover();
+      });
+      $('#search').val("");
+      $('#search').on('keyup', function() {
+          filterApps();
+        });
+})
+    </script>
+  </body>
+</html>
