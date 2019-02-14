@@ -52,7 +52,7 @@ class LdapGroups  {
     }
 
     public function group_info_from_samaccountname($in_group,$in_name) {
-        file_put_contents("/var/storage/phpsessions/samaccountname","$in_group and $in_name");
+        //file_put_contents("/var/storage/phpsessions/samaccountname","$in_group and $in_name");
         if(!isset(LdapGroups::$gconf->ldap->$in_name,LdapGroups::$ldapconn[$in_name])) {
             throw new exception("No config for ldap name $in_name");
         }
@@ -61,6 +61,17 @@ class LdapGroups  {
         $res = ldap_search(LdapGroups::$ldapconn[$in_name],LdapGroups::$gconf->ldap->$in_name->basedn,$filter,$retarray);
         $info = ldap_get_entries(LdapGroups::$ldapconn[$in_name],$res);
         return $info;
+    }
+
+    public function verify_ldap_group($in_group,$in_name) {
+        try { 
+            $retarray = array("distinguishedName");
+            $res = @ldap_search(LdapGroups::$ldapconn[$in_name],$in_group,'objectClass=*',$retarray);
+            $info = @ldap_get_entries(LdapGroups::$ldapconn[$in_name],$res);
+            return count($info)."\n" ;
+        } catch (exception $e) {
+            return 0;
+        }
     }
 
     public function ldap_names() {
