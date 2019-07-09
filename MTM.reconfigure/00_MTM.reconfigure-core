@@ -9,6 +9,8 @@ sys.path.append('/usr/local/munki')
 from munkilib import fetch
 from munkilib import munkicommon
 from munkilib import keychain
+from munkilib import prefs
+from munkilib import display
 
 keychain_obj = keychain.MunkiKeychain()
 
@@ -50,7 +52,32 @@ if params['rename'] == '1':
       if fullhostname != params['name']:
             res = subprocess.check_output(['scutil','--set','HostName',params['name']])
 
-
 if munkicommon.pref('ClientIdentifier') != params['clientidentifier']:
       subprocess.check_output(['defaults','write','/Library/Preferences/ManagedInstalls.plist','ClientIdentifier',params['clientidentifier']])
+
+
+if params['SoftwareRepoURL'] != '':
+      rememberURL = munkicommon.pref('SoftwareRepoURL');
+      if munkicommon.pref('SoftwareRepoURL') != params['SoftwareRepoURL']:
+            display.display_info('Cur SoftwareRepoURL is set to %s' % rememberURL)
+            display.display_info('New SoftwareRepoURL is set to %s' % params['SoftwareRepoURL'])
+            display.display_info('Updating SoftwareRepoURL and testing connection to repo')
+            #sys.stderr.write("Cur SoftwareRepoURL is set to " + rememberURL + "\n")
+            #sys.stderr.write("New SoftwareRepoURL is set to " + params['SoftwareRepoURL'] + "\n")
+            #sys.stderr.write("Up for a change!\n")
+            try: 
+                  subprocess.check_output(['defaults','write','/Library/Preferences/ManagedInstalls.plist','SoftwareRepoURL',params['SoftwareRepoURL']])
+                  certhash = keychain.pem_cert_sha1_digest('/Library/Managed Installs/ssl/munki.pem')
+                  output = keychain.security('set-identity-preference','-s',params['SoftwareRepoURL'] + '/','-Z',certhash,'/Library/Managed Installs/Keychains/munki.keychain');
+                  prefs.reload_prefs()
+                  newURL = params['SoftwareRepoURL'] + '/MTM.reconfigure/get_info.php'
+                  display.display_info('Trying %s' % newURL)
+                  #sys.stderr.write( "Trying " + newURL + "\n")
+                  fetch.getResourceIfChangedAtomically(newURL,'/Library/Managed Installs/onboardinfo2')
+                  display.display_info('Connection successful. Repo URL Changed')
+                  #sys.stderr.write("REPO URL Changed\n");
+            except:
+                  display.display_error('Repo URL change DID NOT WORK. Reverting to previous SoftwareRepoURL')
+                  #sys.stderr.write("Change DID NOT WORK!\n")
+                  subprocess.check_output(['defaults','write','/Library/Preferences/ManagedInstalls.plist','SoftwareRepoURL',rememberURL])
 

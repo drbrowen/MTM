@@ -2,6 +2,7 @@
 
 # This was going to be more involved than it needed to be, so
 # this code mostly just does an exit(0);
+#file_put_contents("/var/storage/phpsessions/gotdelete",$_GET['file']);
 
 if($_SERVER['REQUEST_METHOD'] === "GET") {
     echo "You wanted ".$_GET['file'].". You shouldn't have been redirected here.";
@@ -13,12 +14,21 @@ if($_SERVER['REQUEST_METHOD'] === "PROPFIND") {
     exit(0);
 }
 
+
 if($_SERVER['REQUEST_METHOD'] === "DELETE") {
     http_response_code(200);
     exit(0);
 }
 
 if($_SERVER['REQUEST_METHOD'] === "MOVE") {
+    http_response_code(200);
+    exit(0);
+}
+if($_SERVER['REQUEST_METHOD'] === "UNLOCK") {
+    http_response_code(200);
+    exit(0);
+}
+if($_SERVER['REQUEST_METHOD'] === "LOCK") {
     http_response_code(200);
     exit(0);
 }

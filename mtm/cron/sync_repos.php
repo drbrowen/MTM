@@ -173,7 +173,12 @@ function gen_alias_lines($fullpath,$repos,$gconf) {
         }
         $parentpath = '/'.implode('/',$pathpieces);
         $parentname = str_replace('/','-',substr($parentpath,1));
-        $ret .= "RewriteRule \"^".$gconf->main->urlrepobase.$fullpath.'/([^/]+)/'.$repos[$parentpath]['fileprefix']."(.*)\" ".$gconf->main->fullrepopath.$parentpath.'/$1/'.$repos[$parentpath]['fileprefix'].'$2'."\n";
+
+        $ret .= 'RewriteCond %{REQUEST_METHOD} "!LOCK"'."\n";
+        $ret .= 'RewriteCond %{REQUEST_METHOD} "!UNLOCK"'."\n";
+        $ret .= "RewriteRule \"^".$gconf->main->urlrepobase.$fullpath.'/([^/]+)/'.$repos[$parentpath]['fileprefix']."(.*)\" ".$gconf->main->fullrepopath.$parentpath.'/$1/'.$repos[$parentpath]['fileprefix'].'$2'."\n\n";
+        $ret .= 'RewriteCond %{REQUEST_METHOD} "!LOCK"'."\n";
+        $ret .= 'RewriteCond %{REQUEST_METHOD} "!UNLOCK"'."\n";
         $ret .= "RewriteRule \"^/".$reponame.'/([^/]+)/'.$repos[$parentpath]['fileprefix']."(.*)\" ".$gconf->main->fullrepopath.$parentpath.'/$1/'.$repos[$parentpath]['fileprefix'].'$2'."\n";
     }
 
@@ -197,7 +202,8 @@ function gen_rewrite_lines($fullpath,$repos,$gconf) {
 RewriteCond %{REQUEST_METHOD} "!GET"
 RewriteCond %{REQUEST_METHOD} "!OPTIONS"
 RewriteCond %{REQUEST_METHOD} "!MOVE"
-RewriteCond %{REQUEST_METHOD} "!COPY"
+RewriteCond %{REQUEST_METHOD} "!LOCK"
+RewriteCond %{REQUEST_METHOD} "!UNLOCK"
 RewriteCond %{REQUEST_FILENAME} "!service.php"
 RewriteCond %{REQUEST_FILENAME} "!index.*"'."\n";
         $ret .= "RewriteRule \"^".$gconf->main->urlrepobase.$fullpath.'/([^/]+)/'.$repos[$parentpath]['fileprefix']."(.*)\" /shared/service.php?file=\$1 [END,QSA,NC,H=application/x-httpd-php]\n\n";
