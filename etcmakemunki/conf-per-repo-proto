@@ -21,4 +21,4 @@
 %%REWRITERULES%%
 RewriteRule ^/%%REPONAME%%/MTM.reconfigure(.*) %%RECONFIGPATH%%$1
 RewriteRule ^/%%REPONAME%%/(.*) %%REPOBASEPATH%%%%FULLPATH%%/$1
-RewriteRule ^/%%REPONAME%% %%REPOBASEPATH%%%%FULLPATH%%
+RewriteRule ^/%%REPONAME%%$ %%REPOBASEPATH%%%%FULLPATH%%
