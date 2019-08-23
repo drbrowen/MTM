@@ -12,9 +12,9 @@ mkdir "$GLOBAL_PACKAGEPATH"/munkiconfig-out/munkiconfig-$VERSION.pkg
 # This makes the package linux-style.  Google tells you how to do this.
 cd "$GLOBAL_PACKAGEPATH"/Contents
 find . | cpio -o --format odc --owner 0:80 |gzip -c > "$GLOBAL_PACKAGEPATH"/munkiconfig-out/munkiconfig-$VERSION.pkg/Payload
+mkbom -u 0 -g 80 . "$GLOBAL_PACKAGEPATH"/munkiconfig-out/munkiconfig-$VERSION.pkg/Bom
 cd "$GLOBAL_PACKAGEPATH"/Scripts
 find . | cpio -o --format odc --owner 0:80 |gzip -c > "$GLOBAL_PACKAGEPATH"/munkiconfig-out/munkiconfig-$VERSION.pkg/Scripts
-mkbom -u 0 -g 80 . "$GLOBAL_PACKAGEPATH"/munkiconfig-out/munkiconfig-$VERSION.pkg/Bom
 
 cat - > "$GLOBAL_PACKAGEPATH/munkiconfig-out/Distribution" <<EOF
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
