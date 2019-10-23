@@ -150,6 +150,17 @@ class MTM  {
         if(count($check)>0) {
             throw new exception("add_computer: Computer already exists.");
         }
+
+        $check = T_Computer::search('identifier',$in['identifier'],'=');
+        if(count($check)>0) {
+            $repo = T_Repository::search('ID',$check[0]->Repository_ID,'=');
+            if(count($repo)>0) {
+                throw new exception("add_computer: Computer exists in repository ".$repo[0]->fullpath);
+            } else {
+                throw new exception("add_computer: Computer exists in unknown repository.");
+            }
+        }
+
         
         $comp = new T_Computer();
         $comp->name = $in['name'];
