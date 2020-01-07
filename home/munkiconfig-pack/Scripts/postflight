@@ -1,5 +1,8 @@
 #!/bin/bash
 
+PREFLIGHTD=/usr/local/munki/preflight.d
+PREABORTD=/usr/local/munki/preflight_abort.d
+
 # First get the config .plist set up.
 if [ -f /Library/Managed\ Installs/initial-config/ManagedInstalls.plist ]; then
     GOODONE=`defaults read /Library/Managed\ Installs/initial-config/ManagedInstalls.plist SuccessfulInstall`
@@ -12,17 +15,22 @@ if [ -f /Library/Managed\ Installs/initial-config/ManagedInstalls.plist ]; then
 fi    
 
 # Second, get the reconfigure piece working.  Figure out what's installed.
-if [ -d /usr/local/munki/preflight.d ]; then
-    if [ ! -f /usr/local/munki/preflight.d/00_MTM.reconfigure ]; then
-        cp /usr/local/munki/00_MTM.reconfigure /usr/local/munki/preflight.d
+if [ -d $PREFLIGHTD ]; then
+    if [ ! -f $PREFLIGHTD/00_MTM.reconfigure ]; then
+        cp /usr/local/munki/00_MTM.reconfigure $PREFLIGHTD
     fi
 else
-    mkdir /usr/local/munki/preflight.d
-    cp /usr/local/munki/00_MTM.reconfigure /usr/local/munki/preflight.d
+    mkdir $PREFLIGHTD
+    cp /usr/local/munki/00_MTM.reconfigure $PREFLIGHTD
     if [ -x /usr/local/munki/preflight ]; then
-        mv /usr/local/munki/preflight /usr/local/munki/preflight.d/01_historic_preflight
+        mv /usr/local/munki/preflight $PREFLIGHTD/01_historic_preflight
     fi
     ln -s /usr/local/munki/00_MTM.run_directory /usr/local/munki/preflight
+fi
+
+# Second, get the reconfigure piece working.  Figure out what's installed.
+if [ ! -d $PREABORTD ]; then
+    mkdir $PREABORTD
 fi
 
 killall "Managed Software Center"

@@ -2,7 +2,7 @@
 
 GLOBAL_PACKAGEPATH="$1"
 
-VERSION="3.0.0"
+VERSION="3.0.1"
 
 if [ ! -d "$GLOBAL_PACKAGEPATH/Contents" -o ! -d "$GLOBAL_PACKAGEPATH/Scripts" ]; then
     exit 1
