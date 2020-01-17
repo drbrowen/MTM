@@ -25,8 +25,10 @@ else
     if [ -x /usr/local/munki/preflight ]; then
         mv /usr/local/munki/preflight $PREFLIGHTD/01_historic_preflight
     fi
-    ln -s /usr/local/munki/00_MTM.run_directory /usr/local/munki/preflight
 fi
+
+# Create the preflight symlink
+ln -sfn /usr/local/munki/00_MTM.run_directory /usr/local/munki/preflight
 
 # Second, get the reconfigure piece working.  Figure out what's installed.
 if [ ! -d $PREABORTD ]; then
