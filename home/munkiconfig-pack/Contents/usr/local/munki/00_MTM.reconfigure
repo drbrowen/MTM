@@ -8,19 +8,24 @@ import stat
 import re
 sys.path.append('/usr/local/munki')
 
+from munkilib import display
 from munkilib import fetch
 from munkilib import munkicommon
 from munkilib import keychain
 
+try:
+	keychain_obj = keychain.MunkiKeychain()
 
-keychain_obj = keychain.MunkiKeychain()
+	display.display_info('Fetching latest update code')
+	#print "Fetching latest update code"
+	fullURL = munkicommon.pref('SoftwareRepoURL') + '/MTM.reconfigure/00_MTM.reconfigure-core'
 
-print "Fetching latest update code"
-fullURL = munkicommon.pref('SoftwareRepoURL') + '/MTM.reconfigure/00_MTM.reconfigure-core'
+	fetch.getResourceIfChangedAtomically(fullURL,'/usr/local/munki/00_MTM.reconfigure-core')
 
-fetch.getResourceIfChangedAtomically(fullURL,'/usr/local/munki/00_MTM.reconfigure-core')
+	st = os.stat('/usr/local/munki/00_MTM.reconfigure-core')
+	os.chmod('/usr/local/munki/00_MTM.reconfigure-core', st.st_mode | stat.S_IEXEC)
 
-st = os.stat('/usr/local/munki/00_MTM.reconfigure-core')
-os.chmod('/usr/local/munki/00_MTM.reconfigure-core', st.st_mode | stat.S_IEXEC)
-
-print subprocess.check_output(['/usr/local/munki/00_MTM.reconfigure-core']).strip('\n')
+	print subprocess.check_output(['/usr/local/munki/00_MTM.reconfigure-core']).strip('\n')
+except BaseException as error:
+	display.display_error('Error while running 00_MTM.reconfigure-core: %s' % error)
+	#print "Error while running 00_MTM.reconfigure-core"
