@@ -10,5 +10,5 @@
 	    description="Configures Munki to use the shared Munki Service">
         <pkg-ref id="edu.illinois.munkiconfig"/>
     </choice>
-    <pkg-ref id="edu.illinois.munkiconfig" installKBytes="3" version="3.0.1" auth="Root">#munkiconfig-3.0.1.pkg</pkg-ref>
+    <pkg-ref id="edu.illinois.munkiconfig" installKBytes="3" version="4.0.0" auth="Root">#munkiconfig-4.0.0.pkg</pkg-ref>
 </installer-script>
