@@ -18,16 +18,18 @@ fi
 
 # Make sure we are where the scripts are.
 if [ `pwd` != "$PREABORTD" ]; then
-    echo "Can't change to preflight_abort.d"
+    echo "Can't change to preflight_abort.d" >&2
     exit 0
 fi
 
+echo "Executing scripts in preflight_abort.d"
 for FILE in *;do
     if [ -x $FILE -a -f $FILE ]; then
+        echo "Running $FILE"
         ./$FILE
 	CODE=$?
 	if [ $CODE != 0 ]; then
-	    echo "Exiting with $CODE" >&2
+	    echo "Aborting with code $CODE" >&2
 	    exit $CODE
 	fi
     fi
@@ -40,12 +42,14 @@ fi
 
 # Make sure we are where the scripts are.
 if [ `pwd` != "$PREFLIGHTD" ]; then
-    echo "Can't change to preflight.d"
+    echo "Can't change to preflight.d" >&2
     exit 1
 fi
 
+echo "Executing scripts in preflight.d"
 for FILE in *;do
     if [ -x $FILE -a -f $FILE ]; then
-        ./$FILE
+        echo "Running $FILE"
+        ./$FILE || echo "Encountered error with preflight script $FILE" >&2
     fi
 done
