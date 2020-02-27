@@ -140,9 +140,8 @@
 		});
         all_apps.forEach(function(app) {
             description = app.description || "fixme"; 
-            app.description = description.toLowerCase();
-            app.search = app.name.toLowerCase() + description;
             app.description = description;
+            app.search = app.name.toLowerCase() + description;
         });
         $('#apps').html(Mustache.render(apps_row, {apps: all_apps}, {row: apps_app}));
       	$('[data-toggle="popover"]').popover();
