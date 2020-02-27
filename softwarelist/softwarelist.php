@@ -3,6 +3,9 @@
 
 namespace CFPropertyList;
 
+include_once '/etc/makemunki/readconfig.php';
+$gconf = new \ReadConfig('/etc/makemunki/config');
+
 error_reporting( E_ALL );
 ini_set( 'display_errors', 'on' );
 
@@ -11,34 +14,48 @@ $update = date(DATE_ATOM);
 
 require_once __DIR__."/../vendor/autoload.php";
 
-$plist = new CFPropertyList('/var/storage/roots/repos/global/catalogs/all', CFPropertyList::FORMAT_XML);
+$pliststoinclude = [
+'/var/storage/roots/repos/global/catalogs/all',
+'/var/storage/roots/repos/global/UofI/catalogs/all',
+'/var/storage/roots/repos/global/UofI/UIUC/catalogs/all'];
+
+$plists = [];
+
+foreach ($pliststoinclude as $inc) {
+    $plists[] = new CFPropertyList($inc, CFPropertyList::FORMAT_XML);
+}
 
 $packs = [];
-foreach($plist->toArray() as $pack) {
-    $name = $pack['name'];
-    $tagname = str_replace('.','_',$name);
-    if(!array_key_exists($name,$packs)) {
-        print "Adding array for $name\n";
-        $packs[$name] = [ 'name'=>$name,'versions'=>[],'tagname'=>$tagname ];
-    }
-    $catalogs = $pack['catalogs'];
-    array_multisort($catalogs);
-    $version_info = [ 'version'=>$pack['version'],'catalogs' => $catalogs ];
-    $packs[$name]['versions'][] = $version_info;
-    $description = str_replace("\n",' ',$pack['description']);
-    if(isset($pack['description'])) {
-        $packs[$name]['description'] = $description;
-    }
-    if(isset($pack['icon_name'])) {
-        $icon = $pack['icon_name'];
-        if(!strpos('.',$icon)) {
-            $icon = $pack['icon_name'].'.png';
-        }
-        $packs[$name]['icon'] = $icon;
-    }    
+foreach($plists as $plist) {
 
+    foreach($plist->toArray() as $pack) {
+        if(!isset($pack['name'])) {
+            continue;
+        }
+        $name = $pack['name'];
+        $tagname = str_replace('.','_',$name);
+        if(!array_key_exists($name,$packs)) {
+            #print "Adding array for $name\n";
+            $packs[$name] = [ 'name'=>$name,'versions'=>[],'display_name'=>$pack['display_name'],'tagname'=>$tagname ];
+        }
+        $catalogs = $pack['catalogs'];
+        array_multisort($catalogs);
+        $version_info = [ 'version'=>$pack['version'],'catalogs' => $catalogs ];
+        $packs[$name]['versions'][] = $version_info;
+        $description = str_replace("\n",' ',$pack['description']);
+        if(isset($pack['description'])) {
+            $packs[$name]['description'] = $description;
+        }
+        if(isset($pack['icon_name'])) {
+            $icon = 'icons/'.$pack['icon_name'];
+            if(!strpos('.',$icon)) {
+                $icon = $pack['icon_name'];
+            }
+            $packs[$name]['icon'] = $icon;
+        }    
+    }
 }
-$packs['ppageinfo'] = [];
+$packs['pageinfo'] = [];
 $packs['pageinfo']['name'] = 'pageinfo';
 $packs['pageinfo']['lastupdated'] = $update;
 
