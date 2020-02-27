@@ -14,10 +14,14 @@ $update = date(DATE_ATOM);
 
 require_once __DIR__."/../vendor/autoload.php";
 
+/*
 $pliststoinclude = [
 '/var/storage/roots/repos/global/catalogs/all',
 '/var/storage/roots/repos/global/UofI/catalogs/all',
 '/var/storage/roots/repos/global/UofI/UIUC/catalogs/all'];
+*/
+
+$pliststoinclude = ['/var/storage/roots/repos/global/UofI/UIUC/catalogs/all'];
 
 $plists = [];
 
