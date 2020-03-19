@@ -46,8 +46,8 @@ foreach($plists as $plist) {
         array_multisort($catalogs);
         $version_info = [ 'version'=>$pack['version'],'catalogs' => $catalogs ];
         $packs[$name]['versions'][] = $version_info;
-        $description = str_replace("\n",' ',$pack['description']);
         if(isset($pack['description'])) {
+            $description = str_replace("\n",' ',$pack['description']);
             $packs[$name]['description'] = $description;
         }
         if(isset($pack['icon_name'])) {
@@ -71,3 +71,4 @@ foreach($packs as $key=>$pack) {
 
 $out = json_encode($apps);
 print $out;
+
