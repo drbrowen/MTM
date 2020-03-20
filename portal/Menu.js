@@ -14,6 +14,7 @@ app.controller('menuController',function($scope,$location,$window,Authentication
 		       {url:'#/downloads',name:'Downloads',location:'L',perm:['']},
 		       {url:'https://munkireport.eps.uillinois.edu',name:'Reporting',location:'L',perm:['']},
 		       {url:'https://answers.uillinois.edu/search.php?q=munki+-FAA',name:'Documentation',location:'L',perm:['']},
+                       {url:'packages.html',name:'Available Software',location:'L',perm:['']},
 		      ];
 
     angular.forEach(rawnavitems,function(value) {
