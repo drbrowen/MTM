@@ -286,7 +286,7 @@ foreach($repos as $repo) {
             if(strncmp($permrepo['fullpath'],$repo['fullpath'],strlen($repo['fullpath']))==0) {
                 $perms = $mtm->get_usergroup_permissions_for_repository($permrepo['id']);
                 foreach($perms as $perm) {
-                    if(ereg('R',$perm['repository_permission'])) {
+                    if(preg_match('/R/',$perm['repository_permission'])) {
                         $shibgroups = $sha->get_shibgroups_for_usergroup($perm['usergroup_id']);
                         foreach($shibgroups as $shibgroup) {
                             $shibgrouplen=strlen($shibgroup['ad_path']);
@@ -301,7 +301,7 @@ foreach($repos as $repo) {
         
         $perms = $mtm->get_usergroup_permissions_for_repository($repo['id']);
         foreach($perms as $perm) {
-            if(ereg('W',$perm['repository_permission'])) {
+            if(preg_match('/W/',$perm['repository_permission'])) {
                 $shibgroups = $sha->get_shibgroups_for_usergroup($perm['usergroup_id']);
                 foreach($shibgroups as $shibgroup) {
                     foreach($shibgroups as $shibgroup) {
@@ -314,7 +314,7 @@ foreach($repos as $repo) {
                     }
                 }
             } 
-            if(ereg('R',$perm['repository_permission'])) {
+            if(preg_match('/R/',$perm['repository_permission'])) {
                 $shibgroups = $sha->get_shibgroups_for_usergroup($perm['usergroup_id']);
                 foreach($shibgroups as $shibgroup) {
                     foreach($shibgroups as $shibgroup) {

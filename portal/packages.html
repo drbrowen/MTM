@@ -142,7 +142,7 @@
 	  }
 
       $.getJSON('packages.json', function (data) {
-		all_apps = data.sort((a,b) => a.name.localeCompare(b.display_name));
+		all_apps = data.sort((a,b) => (a.display_name || '').localeCompare(b.display_name || ''));
         var pageinfoidx = all_apps.findIndex(app => app.name == "pageinfo");
         var lastupdated = all_apps[pageinfoidx]['lastupdated'];
         $('#lastupdated').html(lastupdated);

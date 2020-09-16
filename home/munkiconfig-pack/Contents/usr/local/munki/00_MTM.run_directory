@@ -26,7 +26,7 @@ echo "Executing scripts in preflight_abort.d"
 for FILE in *;do
     if [ -x $FILE -a -f $FILE ]; then
         echo "Running $FILE"
-        ./$FILE
+        ./$FILE "$1"
 	CODE=$?
 	if [ $CODE != 0 ]; then
 	    echo "Aborting with code $CODE" >&2
@@ -50,6 +50,6 @@ echo "Executing scripts in preflight.d"
 for FILE in *;do
     if [ -x $FILE -a -f $FILE ]; then
         echo "Running $FILE"
-        ./$FILE || echo "Encountered error with preflight script $FILE" >&2
+        ./$FILE "$1" || echo "Encountered error with preflight script $FILE" >&2
     fi
 done

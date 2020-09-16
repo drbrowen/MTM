@@ -83,7 +83,8 @@ class MTM  {
         $cert->subject = $subject;
         $cert->save();
 
-        $results = shell_exec("sudo -u makemunki /etc/makemunki/sign_certificate.sh ".$cert->ID);
+        //$results = shell_exec("sudo -u makemunki /etc/makemunki/sign_certificate.sh ".$cert->ID);
+        $results = shell_exec("/etc/makemunki/sign_certificate.sh ".$cert->ID);
         // Hack as sudo isn't working properly on this machine.
         //$results = shell_exec("/etc/makemunki/sign_certificate.sh ".$cert->ID);
         #file_put_contents("/var/storage/phpsessions/mtmout","Received results: ".$results."\n");
@@ -531,7 +532,7 @@ class MTM  {
                     $tmp['portal_permbits'] = $this->_unpack_portal_permbits($perm['portal_permission']);
                     $tmp['repository_permission'] = $this->_unpack_repository_permission($perm['repository_permission']);
                     $tmp['repository_permbits'] = $this->_unpack_repository_permbits($perm['repository_permission']);
-                    if(ereg('V',$tmp['portal_permission'])) {
+                    if(preg_match('/V/',$tmp['portal_permission'])) {
                         $ret[] = $tmp;
                     }
             }
@@ -564,7 +565,7 @@ class MTM  {
             $perms = V_UserPermission::search('User_name',$in_user);
 
             foreach($perms as $perm) {
-                if(ereg('G',$this->_unpack_portal_permission($perm->portal_permission))) {
+                if(preg_match('/G/',$this->_unpack_portal_permission($perm->portal_permission))) {
                     $ret[] = $this->repository_by_id($perm->Repository_ID,$in_flags);
                 }
             }
@@ -616,7 +617,7 @@ class MTM  {
         // figure out if we're looking for portal or repository permissions.
         if($in_type === 'R') {
             foreach($perms as $perm) {
-                if(ereg($in_perm,$this->_unpack_repository_permission($perm->repository_permission))) {
+                if(preg_match('/'.$in_perm.'/',$this->_unpack_repository_permission($perm->repository_permission))) {
                     return true;
                 }
             }
@@ -625,7 +626,7 @@ class MTM  {
 
         if($in_type === 'P') {
             foreach($perms as $perm) {
-                if(ereg($in_perm,$this->_unpack_portal_permission($perm->portal_permission))) {
+                if(preg_match('/'.$in_perm.'/',$this->_unpack_portal_permission($perm->portal_permission))) {
                     return true;
                 }
             }
@@ -663,7 +664,7 @@ class MTM  {
         // figure out if we're looking for portal or repository permissions.
         if($in_type === 'R') {
             foreach($perms as $perm) {
-                if(ereg($in_perm,$this->_unpack_repository_permission($perm->repository_permission))) {
+                if(preg_match('/'.$in_perm.'/',$this->_unpack_repository_permission($perm->repository_permission))) {
                     return true;
                 }
             }
@@ -672,7 +673,7 @@ class MTM  {
 
         if($in_type === 'P') {
             foreach($perms as $perm) {
-                if(ereg($in_perm,$this->_unpack_portal_permission($perm->portal_permission))) {
+                if(preg_match('/'.$in_perm.'/',$this->_unpack_portal_permission($perm->portal_permission))) {
                     return true;
                 }
             }
@@ -1240,7 +1241,7 @@ class MTM  {
         // may need to expand to look for other types later
         //if($in_type === 'P') {
             foreach($perms as $perm) {
-                if(ereg($in_perm,$this->_unpack_usergroup_portal_permission($perm->portal_permission))) {
+                if(preg_match('/'.$in_perm.'/',$this->_unpack_usergroup_portal_permission($perm->portal_permission))) {
                     return true;
                 }
             }
@@ -1998,9 +1999,6 @@ class MTM  {
 <p>The requested URL '.$_SERVER['REQUEST_URI'].' was not found on this server.</p>
 <hr>
 <address>Apache/2.4.10 (Debian) Server at munkiserv.lis.illinois.edu Port 443</address>';
-//        if($message !== "") {
-//           echo "<p>".$message."</p>";
-//        }
         } else {
         echo '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
 <html><head>
