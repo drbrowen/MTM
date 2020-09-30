@@ -58,50 +58,48 @@ class MTM  {
         $comp->status !== "reopened") {
             throw new exception("Can't generate a certificate in current state");
         }
+
+        $startwindow = date_timestamp_get(date_create($comp->window_start_date));
+        $endwindow = date_timestamp_get(date_create($comp->window_close_date));
+        $now = time();
+
+        if( ($now - $startwindow) < 0 || ($endwindow - $now)  < 0) {
+            throw new exception("Out of time");
+        }
+
         $subject = $this->gconf->CA->casubjectbase.'/CN='.$comp->identifier;
         $certs = T_Certificate::search(['subject','status'],[$subject,'V'],['=','=']);
+
+        // If a certificate exists, check that we have reopend.
+        // Otherwise, generate a new cert.
         if(count($certs)!=0) {
             if($comp->status !== "reopened") {
                 throw new exception("Certificate for this identifier already exists.");
             }
             
-            $startwindow = date_timestamp_get(date_create($comp->window_start_date));
-            $endwindow = date_timestamp_get(date_create($comp->window_close_date));
-            $now = time();
+         } else {
 
-            if( ($now - $startwindow) < 0 || ($endwindow - $now)  < 0) {
-                throw new exception("Out of time");
-            }            
-
-            $comp->status = 'issued';
-            $comp->save();
-            return $comp;
-        }
-
-        $cert = new T_Certificate;
+            $cert = new T_Certificate;
         
-        $cert->subject = $subject;
-        $cert->save();
+            $cert->subject = $subject;
+            $cert->save();
 
-        //$results = shell_exec("sudo -u makemunki /etc/makemunki/sign_certificate.sh ".$cert->ID);
-        $results = shell_exec("/etc/makemunki/sign_certificate.sh ".$cert->ID);
-        // Hack as sudo isn't working properly on this machine.
-        //$results = shell_exec("/etc/makemunki/sign_certificate.sh ".$cert->ID);
-        #file_put_contents("/var/storage/phpsessions/mtmout","Received results: ".$results."\n");
+            //$results = shell_exec("sudo -u makemunki /etc/makemunki/sign_certificate.sh ".$cert->ID);
+            $results = shell_exec("/etc/makemunki/sign_certificate.sh ".$cert->ID);
 
-        $certs = T_Certificate::search('ID',$cert->ID);
-        $cert = $certs[0];
+            $certs = T_Certificate::search('ID',$cert->ID);
+            $cert = $certs[0];
 
-        if($cert->status !== 'V') {
-            throw new exception("Error signing certificate.");
+            if($cert->status !== 'V') {
+                throw new exception("Error signing certificate.");
+            }
+            
+            $comp->Certificate_ID = $cert;
         }
-
+ 
         $comp->status = 'issued';
-        $comp->Certificate_ID = $cert;
         $comp->save();
-        
         return $comp;
-
     }
 
     public function revoke_cert($in_computer_identifier) {
