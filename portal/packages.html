@@ -93,8 +93,9 @@
             </div>
 
             <div id="card-{{ tagname }}" class="card-body collapse app-description">
+                <p><u>Name:</u> {{ name }}</p>
                 {{#description}}
-                <p>{{ description}}</p>
+                <p><u>Description:</u> {{ description}}</p>
                 {{/description}}
                 {{^description}}
                 <p>No description</p>
@@ -125,7 +126,7 @@
 	  var apps_app = $('#template-apps-app').html();
 	  Mustache.parse(apps_app);
 
-	  function filterApps() {
+	function filterApps() {
         var whatfor = $("#search").val().toLowerCase();
         if (!whatfor || whatfor == "description:") {
             $("div.mainrow > div[data-tagname]").removeClass("hideit");
@@ -142,7 +143,7 @@
 	  }
 
       $.getJSON('packages.json', function (data) {
-		all_apps = data.sort((a,b) => (a.display_name || '').localeCompare(b.display_name || ''));
+	all_apps = data.sort((a,b) => (a.display_name || '').localeCompare(b.display_name || ''));
         var pageinfoidx = all_apps.findIndex(app => app.name == "pageinfo");
         var lastupdated = all_apps[pageinfoidx]['lastupdated'];
         $('#lastupdated').html(lastupdated);
@@ -154,7 +155,7 @@
         all_apps.forEach(function(app) {
             description = app.description || "fixme"; 
             app.description = description;
-            app.search = app.name.toLowerCase() + description;
+            app.search = app.name.toLowerCase() + description + app.display_name.toLowerCase();
         });
         $('#apps').html(Mustache.render(apps_row, {apps: all_apps}, {row: apps_app}));
       	$('[data-toggle="popover"]').popover();
