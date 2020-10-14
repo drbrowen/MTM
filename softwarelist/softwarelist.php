@@ -38,12 +38,18 @@ foreach($plists as $plist) {
         }
         $name = $pack['name'];
         $tagname = str_replace('.','_',$name);
+        $catalogs = $pack['catalogs'];
+        array_multisort($catalogs);
+        #stop if hidefromsoftwarelist catalog is present
+        if(in_array("hidefromsoftwarelist", $catalogs)) {
+            continue;
+        }
         if(!array_key_exists($name,$packs)) {
             #print "Adding array for $name\n";
             $packs[$name] = [ 'name'=>$name,'versions'=>[],'display_name'=>$pack['display_name'],'tagname'=>$tagname ];
         }
-        $catalogs = $pack['catalogs'];
-        array_multisort($catalogs);
+        #$catalogs = $pack['catalogs'];
+        #array_multisort($catalogs);
         $version_info = [ 'version'=>$pack['version'],'catalogs' => $catalogs ];
         $packs[$name]['versions'][] = $version_info;
         if(isset($pack['description'])) {
