@@ -45,6 +45,8 @@ foreach ($groups as $group) {
     $groupfile .= $group['path'].': '.implode(' ',$group['members'])."\n";
 }
 
-file_put_contents("/etc/makemunki/htpasswd",$passfile);
-file_put_contents("/etc/makemunki/htgroup",$groupfile);
+file_put_contents("/etc/makemunki/htpasswd.tmp",$passfile);
+file_put_contents("/etc/makemunki/htgroup.tmp",$groupfile);
 
+rename("/etc/makemunki/htpasswd.tmp","/etc/makemunki/htpasswd");
+rename("/etc/makemunki/htgroup.tmp","/etc/makemunki/htgroup");
