@@ -97,6 +97,7 @@
 	  <attr>certificate</attr>
 	  <attr>status</attr>
 	  <attr>subject</attr>
+          <attr>hash</attr>
 	  <attr>valid_from</attr>
 	  <attr>valid_until</attr>
 	</attributes>

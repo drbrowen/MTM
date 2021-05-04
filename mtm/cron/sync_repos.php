@@ -255,7 +255,7 @@ foreach($repos as $repo) {
     $accesses = "";
     foreach($repos as $rfp => $repodata) {
         if(substr($rfp,0,strlen($repo['fullpath'])) === $repo['fullpath']) {
-            $accesses .= "  require dbd-group ".$rfp."\n";
+            $accesses .= "  require group ".$rfp."\n";
         }
     }
         

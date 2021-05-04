@@ -14,7 +14,8 @@ if(!isset($mtm)) {
     throw new exception("Can't get new mtm structure");
 }
 
-$SUBJECT =  $_SERVER['REMOTE_USER'];
+$SUBJECT = base64_decode($_GET['subject']);
+#$SUBJECT =  $_SERVER['REMOTE_USER'];
 #$SUBJECT = '/C=US/ST=Illinois/L=Urbana/O=University of Illinos/OU=Endpoint Services/CN=C07TK162G1J1';
 
 try {

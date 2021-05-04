@@ -99,6 +99,7 @@ class MTM  {
  
         $comp->status = 'issued';
         $comp->save();
+        $result = shell_exec("/home/makemunki/MTM/mtm/cron/gen_pass_and_grp.php");
         return $comp;
     }
 
@@ -1994,8 +1995,9 @@ class MTM  {
 <title>404 Not Found</title>
 </head><body>
 <h1>Not Found</h1>
-<p>The requested URL '.$_SERVER['REQUEST_URI'].' was not found on this server.</p>
-<hr>
+<p>The requested URL '.$_SERVER['REQUEST_URI'].' was not found on this server.</p>';
+        echo '<p>'.$message.'<p>';
+echo '<hr>
 <address>Apache/2.4.10 (Debian) Server at munkiserv.lis.illinois.edu Port 443</address>';
         } else {
         echo '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">

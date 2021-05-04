@@ -5,6 +5,10 @@ include_once '/etc/makemunki/readconfig.php';
 class CA_Access {
     private static $mdh = 0;
     private $gconf;
+
+    public function get_mdh() {
+        return CA_Access::$mdh;
+    }
     
     public function __construct($handle = '') {
         $this->gconf = new ReadConfig('/etc/makemunki/config');
@@ -145,6 +149,8 @@ class CA_Access {
 
         $vals = openssl_x509_export($rawcert,$pem);
         $cert->certificate = $pem;
+        $cookedcert = openssl_x509_read($pem);
+        $cert->hash = openssl_x509_fingerprint($cookedcert);
         $cert->status = 'V';
         $parsevals = openssl_x509_parse($rawcert);
 
@@ -165,5 +171,13 @@ class CA_Access {
         $cert[0]->status = 'R';
         $cert[0]->save();
     }
-    
+
+    public function retrieve_fingerprint($index) {
+        $cert = T_Certificate::Search('ID',$index);
+        if(count($cert) != 1) {
+            throw new exception("Cannot find certificate.");
+        }
+        $cookedcert = openssl_x509_read($cert[0]->certificate);
+        return openssl_x509_fingerprint($cookedcert);
+    }
 }

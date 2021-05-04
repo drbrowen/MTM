@@ -28,7 +28,7 @@ try {
 }
 catch(exception $e) {
     file_put_contents("/var/storage/phpsessions/makepkgerror",$e->getMessage());
-    $mtm->send_404_page("File Not Found");
+    $mtm->send_404_page($e->getMessage());
     exit(0);
 }
 
