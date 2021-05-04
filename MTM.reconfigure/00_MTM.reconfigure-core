@@ -33,7 +33,6 @@ extraheader = 'Authorization: Basic ' + base64.b64encode(serial_number + ':' + f
 if munkicommon.pref('UseClientCertificate'):
       subprocess.check_output(['defaults','write','/Library/Preferences/ManagedInstalls.plist','AdditionalHttpHeaders','-array',extraheader])
       subprocess.check_output(['defaults','write','/Library/Preferences/ManagedInstalls.plist','UseClientCertificate','-bool','false'])
-      subprocess.check_output(['defaults','write','/Library/Preferences/ManagedInstalls.plist','UseClientCertificateCNAsClientIdentifier','-bool','false'])
       subprocess.check_output(['defaults','delete','/Library/Preferences/ManagedInstalls.plist','ClientCertificatePath'])
       subprocess.check_output(['defaults','delete','/Library/Preferences/ManagedInstalls.plist','ClientKeyPath'])
 f = open('/Library/Managed Installs/onboardinfo')
