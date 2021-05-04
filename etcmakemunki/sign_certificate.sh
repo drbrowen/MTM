@@ -1,6 +1,8 @@
 #!/usr/bin/env php
 <?php
 
+file_put_contents("/var/storage/phpsessions/sign_certificate-out","Started with ".$argv[1]."\n");
+
 require_once "/etc/makemunki/readconfig.php";
 $gconf = new ReadConfig("/etc/makemunki/config");
 set_include_path(get_include_path() . ':'.$gconf->main->codehome);

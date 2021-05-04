@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+import base64
+import os
 import sys
 import subprocess
 
@@ -8,16 +10,32 @@ sys.path.append('/usr/local/munki')
 
 from munkilib import fetch
 from munkilib import munkicommon
-from munkilib import keychain
+#from munkilib import keychain
 from munkilib import prefs
 from munkilib import display
 
-keychain_obj = keychain.MunkiKeychain()
+#keychain_obj = keychain.MunkiKeychain()
 
-fullURL = munkicommon.pref('SoftwareRepoURL') + '/MTM.reconfigure/get_info.php'
+stream = os.popen("openssl x509 -in /Library/Managed\ Installs/ssl/munki.pem -noout -fingerprint | sed -e 's/://g' | awk -F= {'print $2'} | tr '[:upper:]' '[:lower:]'")
+fingerprint = stream.read().strip()
+
+stream = os.popen("openssl x509 -in /Library/Managed\ Installs/ssl/munki.pem -noout -subject | sed -e 's/subject= //'")
+subject = stream.read().strip()
+
+fullURL = munkicommon.pref('SoftwareRepoURL') + '/MTM.reconfigure/get_info.php?fingerprint=' + fingerprint + '&subject=' + base64.b64encode(subject)
 
 fetch.getResourceIfChangedAtomically(fullURL,'/Library/Managed Installs/onboardinfo')
 
+stream = os.popen("ioreg -c IOPlatformExpertDevice -d 2 | awk -F\\\" '/IOPlatformSerialNumber/{print $(NF-1)}'")
+serial_number = stream.read().strip()
+extraheader = 'Authorization: Basic ' + base64.b64encode(serial_number + ':' + fingerprint)
+
+if munkicommon.pref('UseClientCertificate'):
+      subprocess.check_output(['defaults','write','/Library/Preferences/ManagedInstalls.plist','AdditionalHttpHeaders','-array',extraheader])
+      subprocess.check_output(['defaults','write','/Library/Preferences/ManagedInstalls.plist','UseClientCertificate','-bool','false'])
+      subprocess.check_output(['defaults','write','/Library/Preferences/ManagedInstalls.plist','UseClientCertificateCNAsClientIdentifier','-bool','false'])
+      subprocess.check_output(['defaults','delete','/Library/Preferences/ManagedInstalls.plist','ClientCertificatePath'])
+      subprocess.check_output(['defaults','delete','/Library/Preferences/ManagedInstalls.plist','ClientKeyPath'])
 f = open('/Library/Managed Installs/onboardinfo')
 
 params = {}
