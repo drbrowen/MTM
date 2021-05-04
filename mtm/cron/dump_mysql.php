@@ -11,8 +11,9 @@ $dbhost = $gconf->db->dbhost;
 $user = $gconf->db->dbuser;
 $pass = $gconf->db->dbpass;
 $backdir = $gconf->db->backupdir;
+$maxback = $gconf->db->backupcopies;
 
-for ($i=5;$i>0;$i--) {
+for ($i=$maxback;$i>0;$i--) {
     $oldfile = "$backdir/$dbname.sql.".$i;
     if(file_exists("$oldfile")) {
         $tmp = $i + 1;
