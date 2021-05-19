@@ -35,6 +35,13 @@ if munkicommon.pref('UseClientCertificate'):
       subprocess.check_output(['defaults','write','/Library/Preferences/ManagedInstalls.plist','UseClientCertificate','-bool','false'])
       subprocess.check_output(['defaults','delete','/Library/Preferences/ManagedInstalls.plist','ClientCertificatePath'])
       subprocess.check_output(['defaults','delete','/Library/Preferences/ManagedInstalls.plist','ClientKeyPath'])
+
+old_pref_file = '/var/root/Library/Preferences/ManagedInstalls.plist'
+if os.path.exists(old_pref_file):
+      with open(old_pref_file) as file:
+            if 'AdditionalHttpHeaders' in file.read():
+                  subprocess.check_output(['defaults','delete',old_pref_file,'AdditionalHttpHeaders'])
+
 f = open('/Library/Managed Installs/onboardinfo')
 
 params = {}
