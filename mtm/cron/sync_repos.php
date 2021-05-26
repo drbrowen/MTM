@@ -252,12 +252,13 @@ foreach($repos as $repo) {
     $repodir = $gconf->main->fullrepopath.$repo['fullpath'];
     create_repo_dir($repodir);
     
-    $accesses = "";
+    $accesses = " require group ";
     foreach($repos as $rfp => $repodata) {
         if(substr($rfp,0,strlen($repo['fullpath'])) === $repo['fullpath']) {
-            $accesses .= "  require group ".$rfp."\n";
+            $accesses .= " ".$rfp." ";
         }
     }
+    $accesses .= "\n";
         
     $aliaslines = gen_alias_lines($repo['fullpath'],$repos,$gconf);
 
