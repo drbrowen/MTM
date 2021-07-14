@@ -16,12 +16,15 @@ fi
 
 # Second, get the reconfigure piece working.  Figure out what's installed.
 if [ -d $PREFLIGHTD ]; then
-    if [ ! -f $PREFLIGHTD/00_MTM.reconfigure ]; then
-        cp /usr/local/munki/00_MTM.reconfigure $PREFLIGHTD
+    if [ ! -f $PREFLIGHTD/00_MTM.reconfigure.sh ]; then
+        cp /usr/local/munki/00_MTM.reconfigure.sh $PREFLIGHTD
+    fi
+    if [ -f $PREFLIGHTD/00_MTM.reconfigure ]; then
+        rm $PREFLIGHTD/00_MTM.reconfigure
     fi
 else
     mkdir $PREFLIGHTD
-    cp /usr/local/munki/00_MTM.reconfigure $PREFLIGHTD
+    cp /usr/local/munki/00_MTM.reconfigure.sh $PREFLIGHTD
     if [ -x /usr/local/munki/preflight ]; then
         mv /usr/local/munki/preflight $PREFLIGHTD/01_historic_preflight
     fi

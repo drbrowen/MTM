@@ -5,6 +5,9 @@ for FILE in $FILELIST;do
   if [ -f $FILE ]; then
      rm $FILE
   fi
+  if [ -f $FILE.sh ]; then
+     rm $FILE.sh
+  fi
 done
 
 if [ -L /usr/local/munki/preflight ]; then
