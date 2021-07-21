@@ -12,14 +12,31 @@ subject=`openssl x509 -in /Library/Managed\ Installs/ssl/munki.pem -noout -subje
 base64subject=`/bin/echo -n "$subject" | base64`
 SoftwareRepoURL=`/usr/bin/defaults read "$munki_pref_file" 'SoftwareRepoURL'`
 fullURL="$SoftwareRepoURL/MTM.reconfigure/get_info.php?fingerprint=$fingerprint&subject=$base64subject"
-basicAuthHeader=`/usr/libexec/PlistBuddy -c 'Print :'AdditionalHttpHeaders:0'' "$munki_pref_file"`
-/usr/bin/curl -v "$fullURL" -o "$onboardinfo_file" -H "$basicAuthHeader"
+#basicAuthHeader=`/usr/libexec/PlistBuddy -c 'Print :'AdditionalHttpHeaders:0'' "$munki_pref_file"`
+serial_number=`ioreg -c IOPlatformExpertDevice -d 2 | awk -F'\\\"' '/IOPlatformSerialNumber/{print $(NF-1)}'`
+base64header=`/bin/echo -n "$serial_number:$fingerprint" | base64`
+basicAuthHeader="Authorization: Basic $base64header"
+/usr/bin/curl "$fullURL" -o "$onboardinfo_file" -H "$basicAuthHeader"
 
-#### VERIFY ONBOARDINFO FILE  EXISTS####
+#### VERIFY ONBOARDINFO FILE EXISTS ####
 exitcode=$?
 if [ "$exitcode" != 0 ];then
 	/bin/echo "$(date "+%b %d %Y %H:%M:%S %z") 'Unable to download onboard info. Exiting...'" >> $munki_log 2>&1
 	exit 0
+fi
+
+#### CONFIGURE MUNKI BASIC AUTH ####
+UseClientCertificatePref=`/usr/bin/defaults read "$munki_pref_file" 'UseClientCertificate'`
+exitcode=$?
+# Defaults read doesn't return empty output
+if [ ! -z "$UseClientCertificatePref" -a "$exitcode" = 0 ];then
+	if [ "$UseClientCertificatePref" = 1 ];then
+		`/usr/bin/defaults write '/Library/Preferences/ManagedInstalls.plist' 'AdditionalHttpHeaders' '-array' "$basicAuthHeader"`
+		`/usr/bin/defaults write '/Library/Preferences/ManagedInstalls.plist' 'UseClientCertificate' '-bool' 'false'`
+		`/usr/bin/defaults write '/Library/Preferences/ManagedInstalls.plist' 'UseClientCertificateCNAsClientIdentifier' '-bool' 'false'`
+		`/usr/bin/defaults delete '/Library/Preferences/ManagedInstalls.plist' 'ClientCertificatePath'`
+		`/usr/bin/defaults delete '/Library/Preferences/ManagedInstalls.plist' 'ClientKeyPath'`
+	fi
 fi
 
 #### PARSE ONBOARDINFO FILE ####
@@ -59,7 +76,6 @@ done < "$onboardinfo_file"
 
 #### UPDATE CLIENTIDENTIFIER PREFERENCE ####
 ClientIdentifier=`/usr/bin/defaults read "$munki_pref_file" 'ClientIdentifier'`
-
 if [ "$ClientIdentifier" != "$inclientidentifier" ];then
 	`/usr/bin/defaults write '/Library/Preferences/ManagedInstalls.plist' 'ClientIdentifier' "$inclientidentifier"`
 fi
