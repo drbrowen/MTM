@@ -17,20 +17,6 @@ if [ "$exitcode" != 0 ];then
 	exit 0
 fi
 
-#### CONFIGURE MUNKI BASIC AUTH ####
-UseClientCertificatePref=`/usr/bin/defaults read "$munki_pref_file" 'UseClientCertificate'`
-exitcode=$?
-# Defaults read doesn't return empty output
-if [ ! -z "$UseClientCertificatePref" -a "$exitcode" = 0 ];then
-	if [ "$UseClientCertificatePref" = 1 ];then
-		`/usr/bin/defaults write '/Library/Preferences/ManagedInstalls.plist' 'AdditionalHttpHeaders' '-array' "$basicAuthHeader"`
-		`/usr/bin/defaults write '/Library/Preferences/ManagedInstalls.plist' 'UseClientCertificate' '-bool' 'false'`
-		`/usr/bin/defaults write '/Library/Preferences/ManagedInstalls.plist' 'UseClientCertificateCNAsClientIdentifier' '-bool' 'false'`
-		`/usr/bin/defaults delete '/Library/Preferences/ManagedInstalls.plist' 'ClientCertificatePath'`
-		`/usr/bin/defaults delete '/Library/Preferences/ManagedInstalls.plist' 'ClientKeyPath'`
-	fi
-fi
-
 #### PARSE ONBOARDINFO FILE ####
 inclientidentifier=''
 inrename=''

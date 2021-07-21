@@ -36,18 +36,12 @@ class MunkiPackage {
   <false/>
   <key>InstallAppleSoftwareUpdates</key>
   <true/>
-  <key>UseClientCertificate</key>
-  <true/>
   <key>LogToSyslog</key>
   <false/>
-  <key>ClientKeyPath</key>
-  <string>/Library/Managed Installs/ssl/munki.key</string>
   <key>LogFile</key>
   <string>/Library/Managed Installs/Logs/ManagedSoftwareUpdate.log</string>
   <key>ManagedInstallDir</key>
   <string>/Library/Managed Installs</string>
-  <key>ClientCertificatePath</key>
-  <string>/Library/Managed Installs/ssl/munki.pem</string>
   <key>FollowHTTPRedirects</key>
   <string>https</string>
   <key>SoftwareRepoURL</key>

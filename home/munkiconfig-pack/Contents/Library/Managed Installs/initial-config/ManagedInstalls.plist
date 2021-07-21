@@ -5,21 +5,13 @@
   <false/>
   <key>InstallAppleSoftwareUpdates</key>
   <true/>
-  <key>UseClientCertificate</key>
-  <true/>
   <key>LogToSyslog</key>
   <false/>
-  <key>ClientKeyPath</key>
-  <string>/Library/Managed Installs/ssl/munki.key</string>
   <key>LogFile</key>
   <string>/Library/Managed Installs/Logs/ManagedSoftwareUpdate.log</string>
-  <key>SoftwareRepoURL</key>
-  <string>https://munkiserv.lis.illinois.edu/munkirepo-UIUC-GSLIS</string>
   <key>ManagedInstallDir</key>
   <string>/Library/Managed Installs</string>
-  <key>ClientCertificatePath</key>
-  <string>/Library/Managed Installs/ssl/munki.pem</string>
   <key>ClientIdentifier</key>
-  <string>ischool_hdlap</string>
+  <string></string>
 </dict>
 </plist>
