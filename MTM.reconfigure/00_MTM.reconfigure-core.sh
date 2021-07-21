@@ -7,15 +7,7 @@ onboardinfo_file='/Library/Managed Installs/onboardinfo'
 onboardinfo2_file='/Library/Managed Installs/onboardinfo2'
 
 #### DOWNLOAD LATEST VERSION OF ONBOARDINFO FILE ####
-fingerprint=`openssl x509 -in /Library/Managed\ Installs/ssl/munki.pem -noout -fingerprint | sed -e 's/://g' | awk -F= {'print $2'} | tr '[:upper:]' '[:lower:]' | sed -e 's/ *$//g'`
-subject=`openssl x509 -in /Library/Managed\ Installs/ssl/munki.pem -noout -subject | sed -e 's/subject= //'`
-base64subject=`/bin/echo -n "$subject" | base64`
-SoftwareRepoURL=`/usr/bin/defaults read "$munki_pref_file" 'SoftwareRepoURL'`
-fullURL="$SoftwareRepoURL/MTM.reconfigure/get_info.php?fingerprint=$fingerprint&subject=$base64subject"
-#basicAuthHeader=`/usr/libexec/PlistBuddy -c 'Print :'AdditionalHttpHeaders:0'' "$munki_pref_file"`
-serial_number=`ioreg -c IOPlatformExpertDevice -d 2 | awk -F'\\\"' '/IOPlatformSerialNumber/{print $(NF-1)}'`
-base64header=`/bin/echo -n "$serial_number:$fingerprint" | base64`
-basicAuthHeader="Authorization: Basic $base64header"
+basicAuthHeader=`/usr/libexec/PlistBuddy -c 'Print :'AdditionalHttpHeaders:0'' "$munki_pref_file"`
 /usr/bin/curl "$fullURL" -o "$onboardinfo_file" -H "$basicAuthHeader"
 
 #### VERIFY ONBOARDINFO FILE EXISTS ####
