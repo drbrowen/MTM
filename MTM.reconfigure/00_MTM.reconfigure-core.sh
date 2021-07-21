@@ -34,22 +34,22 @@ while read A; do
 	case $attr in
 		clientidentifier*)
 			inclientidentifier="$val"
-			echo clientidentifier
+			#echo clientidentifier
 			;;
 			
 		rename*)
 			inrename="$val"
-			echo rename
+			#echo rename
 			;;
 
 		name*)
 			inname="$val"
-			echo name
+			#echo name
 			;;
 
 		SoftwareRepoURL*)
 			inSoftwareRepoURL="$val"
-			echo SoftwareRepoURL
+			#echo SoftwareRepoURL
 			;;
 			
 		*)
@@ -86,17 +86,13 @@ exitcode=$?
 if [ ! -z "$SoftwareRepoURL" -a "$exitcode" = 0 ];then
 	rememberURL="$SoftwareRepoURL"
 	if [ "$SoftwareRepoURL" != "$inSoftwareRepoURL" ];then
-		/bin/echo "$(date "+%b %d %Y %H:%M:%S %z") Cur SoftwareRepoURL is set to $rememberURL"
 		/bin/echo "$(date "+%b %d %Y %H:%M:%S %z") Cur SoftwareRepoURL is set to $rememberURL" >> $munki_log 2>&1
-		/bin/echo "$(date "+%b %d %Y %H:%M:%S %z") New SoftwareRepoURL is set to $inSoftwareRepoURL"
 		/bin/echo "$(date "+%b %d %Y %H:%M:%S %z") New SoftwareRepoURL is set to $inSoftwareRepoURL" >> $munki_log 2>&1
-		/bin/echo "$(date "+%b %d %Y %H:%M:%S %z") Updating SoftwareRepoURL and testing connection to repo"
 		/bin/echo "$(date "+%b %d %Y %H:%M:%S %z") Updating SoftwareRepoURL and testing connection to repo" >> $munki_log 2>&1
 		/usr/bin/defaults write '/Library/Preferences/ManagedInstalls.plist' 'SoftwareRepoURL' "$inSoftwareRepoURL"
 		SoftwareRepoURL=`/usr/bin/defaults read $munki_pref_file 'SoftwareRepoURL'`
-		newURL="$SoftwareRepoURL/MTM.reconfigure/get_info.php"
-		/bin/echo "$(date "+%b %d %Y %H:%M:%S %z") Trying $newURL"
-		/bin/echo "$(date "+%b %d %Y %H:%M:%S %z") Trying $newURL" >> $munki_log 2>&1
+		newURL="$SoftwareRepoURL/MTM.reconfigure/get_info.php?fingerprint=$fingerprint&subject=$base64subject"
+		/bin/echo "$(date "+%b %d %Y %H:%M:%S %z") Trying $SoftwareRepoURL" >> $munki_log 2>&1
 		
 		/usr/bin/curl "$newURL" -o "$onboardinfo2_file" -H "$basicAuthHeader"
 		exitcode=$?
