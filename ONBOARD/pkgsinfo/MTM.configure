@@ -44,23 +44,7 @@ PKGFILE="munkiconfig.pkg?ident=$SERIALNUMBER"
 
 FULLURL="$SERVER/$PACKAGEPATH/$PKGFILE"
 
-/usr/bin/python &lt;&lt;EOF
-import sys
-sys.path.append('/usr/local/munki');
-
-from munkilib import fetch
-from munkilib import munkicommon
-from munkilib import keychain
-
-keychain_obj = keychain.MunkiKeychain()
-
-try:
-  fetch.getResourceIfChangedAtomically('$FULLURL',
-                                 '$OUTPACKAGE');
-except Exception as e:
-  pass
-
-EOF
+/usr/bin/curl "$FULLURL" -o "$OUTPACKAGE"
 
 if [ -f $OUTPACKAGE ]; then
 #    echo YES
