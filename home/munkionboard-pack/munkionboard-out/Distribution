@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <installer-script authoringTool="edu.illinois.PackageMaker" authoringToolVersion="3.0.4" authoringToolBuild="179" minSpecVersion="1">
     <title>Munkionboard - Configure Munki for Illinois</title>
-    <options customize="allow" allow-external-scripts="no"/>
+    <options customize="allow" allow-external-scripts="no" hostArchitectures="x86_64,arm64"/>
     <domains enable_anywhere="true"/>
     <choices-outline>
         <line choice="config"/>
