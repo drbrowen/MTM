@@ -17,7 +17,7 @@ class xx_xml {
     var $type;
 
     // function with the default parameter value
-    function xx_xml($url='', $type='url') {
+    function __construct($url='', $type='url') {
       $this->type = $type;
       $this->url  = $url;
       $this->parse();
@@ -95,15 +95,13 @@ class xx_xml {
         exit();
     }
 }
-
 $contents = new xx_xml($argv[1],'url');
-
 //print "DB Name = ".$contents->data['dbconfig|schema|name']['data'][0]."\n";
 //print "Tables = " . implode(', ',$contents->data['dbconfig|schema|tables|table|dbname']['data'])."\n";
 
-//print var_dump($contents->data);
-//print var_dump($contents->curattr);
-//exit(0);
+#print var_dump($contents->data);
+#print var_dump($contents->curattr);
+#exit(0);
 
 
 // Make sure we have a valid schema XML file before proceeding.

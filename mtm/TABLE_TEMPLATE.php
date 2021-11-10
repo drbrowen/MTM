@@ -104,7 +104,7 @@ class %CLASSNAME% extends %SCHEMANAME% {
     return $this->realvals[%CLASSNAME%::$PK];
   }
 
-  public function search($key,$val,$compare = "=") {
+  public static function search($key,$val,$compare = "=") {
     if(is_array($key) ||
        is_array($val) ||
        is_array($compare)) {
@@ -128,7 +128,7 @@ class %CLASSNAME% extends %SCHEMANAME% {
 
   }
 
-  private function _search($keys,$compvals,$compares) {
+  private static function _search($keys,$compvals,$compares) {
     $val = array();
     $wheres = array();
     foreach($keys as $ord => $key) {

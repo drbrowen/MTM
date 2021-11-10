@@ -29,7 +29,7 @@ class %CLASSNAME% extends %SCHEMANAME% {
     throw new exception("%CLASSNAME%::__get(): You're asking for something I just can't give you. (".$key.")");
   }
 
-  public function search($key,$val,$compare = "=") {
+  public static function search($key,$val,$compare = "=") {
     if(is_array($key) ||
        is_array($val) ||
        is_array($compare)) {
@@ -53,7 +53,7 @@ class %CLASSNAME% extends %SCHEMANAME% {
 
   }
 
-  private function _search($keys,$compvals,$compares) {
+  private static function _search($keys,$compvals,$compares) {
     $val = array();
     $wheres = array();
     foreach($keys as $ord => $key) {

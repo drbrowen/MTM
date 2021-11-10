@@ -32,7 +32,7 @@ catch(exception $e) {
     exit(0);
 }
 
-if(array_key_exists('error',$clientpkg)) {
+if(is_array($clientpkg) && array_key_exists('error',$clientpkg)) {
     print "Got an error\n";
     $mtm->send_404_page($clientpkg['error']);
     exit(0);
