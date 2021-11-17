@@ -6,7 +6,7 @@ namespace CFPropertyList;
 include_once '/etc/makemunki/readconfig.php';
 $gconf = new \ReadConfig('/etc/makemunki/config');
 
-error_reporting( E_ALL );
+#error_reporting( E_ALL );
 ini_set( 'display_errors', 'on' );
 
 date_default_timezone_set($gconf->main->timezone);

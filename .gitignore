@@ -1,3 +1,4 @@
 # Emacs auto-backup files.
 *~
 vendor
+composer.lock
