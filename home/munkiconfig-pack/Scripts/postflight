@@ -16,7 +16,7 @@ fi
 
 # Second, get the auth info header into the plist file.
 if [ -f "/Library/Managed Installs/ssl/munki.pem" ]; then
-    fingerprint=`openssl x509 -in /Library/Managed\ Installs/ssl/munki.pem -noout -fingerprint | sed -e 's/://g' | awk -F= {'print $2'} | tr '[:upper:]' '[:lower:]' | sed -e 's/ *$//g'`
+    fingerprint=`openssl x509 -in /Library/Managed\ Installs/ssl/munki.pem -noout -fingerprint -sha1 | sed -e 's/://g' | awk -F= {'print $2'} | tr '[:upper:]' '[:lower:]' | sed -e 's/ *$//g'`
     serial_number=`ioreg -c IOPlatformExpertDevice -d 2 | awk -F'\\\"' '/IOPlatformSerialNumber/{print $(NF-1)}'`
     base64header=`/bin/echo -n "$serial_number:$fingerprint" | base64`
     basicAuthHeader="Authorization: Basic $base64header"
