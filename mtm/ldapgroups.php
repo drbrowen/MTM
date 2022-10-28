@@ -67,8 +67,12 @@ class LdapGroups  {
         try { 
             $retarray = array("distinguishedName");
             $res = @ldap_search(LdapGroups::$ldapconn[$in_name],$in_group,'objectClass=*',$retarray);
-            $info = @ldap_get_entries(LdapGroups::$ldapconn[$in_name],$res);
-            return count($info)."\n" ;
+            if($res) {
+                $info = @ldap_get_entries(LdapGroups::$ldapconn[$in_name],$res);
+                return count($info)."\n" ;
+            } else {
+                return "0\n";
+            }
         } catch (exception $e) {
             return 0;
         }
