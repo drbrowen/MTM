@@ -185,11 +185,11 @@ class MyAPI extends API
                     }
                     if(isset($invars->rename_on_install)) {
                         $params['rename_on_install'] =
-                            $invars->rename_on_install;
+                            intval($invars->rename_on_install);
                     }
                     if(isset($invars->use_template)) {
                         $params['use_template'] =
-                            $invars->use_template;
+                            intval($invars->use_template);
                     }
                     if(isset($invars->force_retemplate)) {
                         $params['force_retemplate'] = 
