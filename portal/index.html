@@ -23,14 +23,15 @@
     <body>
         <div id="wrap">
             <div class="banner" role="banner">
-                <img alt="University of Illinois" src="uillinois-wordmark-large.png"/>
+                <a href="https://www.uillinois.edu" target="_blank"><img src="uillinois-wordmark-large.png" alt="University of Illinois"></a>
+                <h1><a style="color:white;text-decoration:none;" href="#">University of Illinois Multi-Tenant Munki</a></h1>
             </div>
 	    <div ng-controller="menuController">
 	      <div class="container">
 		<nav class="navbar navbar-default navbaruofi">
 		  <div class="container-fluid">
 		    <ul class="nav navbar-nav navbaruofi">
-		      <li class="active navbar-default navbaruofi" ng-repeat="navitem in navitems"><a class="navbaruofi" href="{{navitem.url}}">{{navitem.name}}</a></li>
+		      <li class="active navbar-default navbaruofi" ng-repeat="navitem in navitems"><a class="navbaruofi" href="{{navitem.url}}" target="{{navitem.target}}">{{navitem.name}}</a></li>
 		    </ul>
 		    <ul class="nav navbar-nav navbar-right navbaruofi">
 		      <li class="active" ng-repeat="navitem in rnavitems"><a href="{{navitem.url}}">{{navitem.name}}</a></li>
@@ -59,13 +60,14 @@
                     <div class="col-sm-12">
                         <p>
                             Site developed by: <strong>
-                                <a target="_blank" href="https://ischool.illinois.edu/">The iSchool at Illinois</a>
-                            </strong>  |  
-                            <a target="_blank" href="http://illinois.edu/">University of Illinois at Urbana-Champaign</a>
-                            | <a target="_blank" href="https://www.vpaa.uillinois.edu/resources/web_privacy">Privacy Policy</a>
+                                <a target="_blank" href="https://ischool.illinois.edu/">The iSchool at Illinois</a></strong> and <strong><a target="_blank" href="https://techservices.illinois.edu/">Technology Services</a>
+                            </strong>  
                         </p>
                         <p> 
-                            Need Help? <a href="https://go.illinois.edu/epshelp">Munki Portal Questions</a>
+                            Need Help? <a href="https://go.illinois.edu/epshelp">Munki Portal Support</a>
+                        </p>
+                        <p>
+                            Copyright ©2022 The Board of Trustees of the University of Illinois | <a target="_blank" href="http://go.uillinois.edu/webprivacy">Privacy Statement and Terms of Use</a>
                         </p>
                     </div>
                 </div>

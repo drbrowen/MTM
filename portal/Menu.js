@@ -8,13 +8,14 @@ app.controller('menuController',function($scope,$location,$window,Authentication
     });
 
     // A 'perm' category is for future expansion where only some items show up.
-    var rawnavitems = [{url:'#/computers/search',name:'Manage Computers',location:'L',perm:['']},
-		       {url:'#/usergroups/search',name:'Manage Groups and Permissions',location:'L',perm:['']},
-		       {url:'#/repositories/search',name:'Manage Repositories',location:'L',perm:['']},
-		       {url:'#/downloads',name:'Downloads',location:'L',perm:['']},
-		       {url:'https://munkireport.eps.uillinois.edu',name:'Reporting',location:'L',perm:['']},
-		       {url:'https://answers.uillinois.edu/search.php?q=munki+-FAA',name:'Documentation',location:'L',perm:['']},
-                       {url:'packages.html',name:'Available Software',location:'L',perm:['']},
+    // A 'target' category controls whether the nav bar item opens in the same or a new window/tab in the browser
+    var rawnavitems = [{url:'#/computers/search',name:'Manage Computers',location:'L',perm:[''],target:'_self'},
+		       {url:'#/usergroups/search',name:'Manage Groups and Permissions',location:'L',perm:[''],target:'_self'},
+		       {url:'#/repositories/search',name:'Manage Repositories',location:'L',perm:[''],target:'_self'},
+		       {url:'#/downloads',name:'Downloads',location:'L',perm:[''],target:'_self'},
+		       {url:'https://munkireport.eps.uillinois.edu',name:'Reporting',location:'L',perm:[''],target:'_blank'},
+		       {url:'https://answers.uillinois.edu/search.php?q=munki+-FAA',name:'Documentation',location:'L',perm:[''],target:'_blank'},
+                       {url:'packages.html',name:'Available Software',location:'L',perm:[''],target:'_blank'},
 		      ];
 
     angular.forEach(rawnavitems,function(value) {
