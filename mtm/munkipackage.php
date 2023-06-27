@@ -35,7 +35,7 @@ class MunkiPackage {
   <key>AppleSoftwareUpdatesOnly</key>
   <false/>
   <key>InstallAppleSoftwareUpdates</key>
-  <true/>
+  <false/>
   <key>LogToSyslog</key>
   <false/>
   <key>LogFile</key>
