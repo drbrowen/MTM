@@ -14,7 +14,7 @@ app.controller('menuController',function($scope,$location,$window,Authentication
 		       {url:'#/repositories/search',name:'Manage Repositories',location:'L',perm:[''],target:'_self'},
 		       {url:'#/downloads',name:'Downloads',location:'L',perm:[''],target:'_self'},
 		       {url:'https://munkireport.eps.uillinois.edu',name:'Reporting',location:'L',perm:[''],target:'_blank'},
-		       {url:'https://answers.uillinois.edu/search.php?q=munki+-FAA',name:'Documentation',location:'L',perm:[''],target:'_blank'},
+		       {url:'https://answers.uillinois.edu/search.php?q=TechS-EPS-MTM',name:'Documentation',location:'L',perm:[''],target:'_blank'},
                        {url:'packages.html',name:'Available Software',location:'L',perm:[''],target:'_blank'},
 		      ];
 
