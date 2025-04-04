@@ -9,7 +9,7 @@ onboardinfo2_file='/Library/Managed Installs/onboardinfo2'
 #### DOWNLOAD LATEST VERSION OF ONBOARDINFO FILE ####
 fingerprint=`openssl x509 -in /Library/Managed\ Installs/ssl/munki.pem -noout -fingerprint -sha1 | sed -e 's/://g' | awk -F= {'print $2'} | tr '[:upper:]' '[:lower:]' | sed -e 's/ *$//g'`
 subject=`openssl x509 -in /Library/Managed\ Installs/ssl/munki.pem -noout -subject | sed -e 's/subject= //'`
-base64subject=`/bin/echo -n "$subject" | base64`
+base64subject=`/bin/echo -n "$subject" | base64 -b 0`
 SoftwareRepoURL=`/usr/bin/defaults read "$munki_pref_file" 'SoftwareRepoURL'`
 fullURL="$SoftwareRepoURL/MTM.reconfigure/get_info.php?fingerprint=$fingerprint&subject=$base64subject"
 basicAuthHeader=`/usr/libexec/PlistBuddy -c 'Print :'AdditionalHttpHeaders:0'' "$munki_pref_file"`
