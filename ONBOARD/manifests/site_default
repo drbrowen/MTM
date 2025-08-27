@@ -14,6 +14,7 @@
   <key>managed_installs</key>
   <array>
     <string>MTM.configure</string>
+    <string>munkitools5_python</string>
   </array>
   <key>optional_installs</key>
   <array>
